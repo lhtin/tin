@@ -48,7 +48,7 @@ hexo new post hexo-guide // 根据scaffolds中的post模版生成文章的基本
 
 ### 根据需要修改配置
 
-在初始化完了项目之后，我做了一些修改，已满足我的需求。首先定义网站的相关信息（更多配置说明请参加[官方文档-配置](https://hexo.io/zh-cn/docs/configuration)）：
+在初始化完了项目之后，我做了一些修改，以满足我的需求。首先定义网站的相关信息（更多配置说明请参见[官方文档-配置](https://hexo.io/zh-cn/docs/configuration)）：
 
 ```yml
 # 项目根目录下的_config.yml文件
@@ -65,20 +65,20 @@ url: https://lhtin.gitee.io
 root: /
 ```
 
-然后还需要根据我自己的要求，修改默认主题[landscape](https://github.com/hexojs/hexo-theme-landscape)的部分内容，所有修改的内容可以参见我fork出来的[仓库](https://gitee.com/lhtin/hexo-theme-landscape)。这里我列出主要的修改：
+然后还需要根据我自己的要求，修改默认主题[landscape](https://github.com/hexojs/hexo-theme-landscape)的部分内容。所有修改的内容可以参见我fork出来的[仓库](https://gitee.com/lhtin/hexo-theme-landscape)。这里我列出主要的修改：
 
 - 将一些英文翻译为中文，比如Home -> 首页，Read More -> 阅读全文
 - 去掉tagcloud，调整widgets的顺序，打开展示分类和标签中对应的文章数量的flag
 - 添加百度统计，并和Google统计合并到一个ejs文件
 - 去掉文章头部的日期和分类展示。让文章标题居中展示，并且在文章下面展示文章作者和日期
 - 去掉右上角的导航，固定展示为“首页”
-- 修改首页展示摘要内容的样式
+- 修改首页展示文章摘抄的样式
 
-### 构建、部署
+### 构建和部署
 
-当你写好了一篇博客文章之后，就需要构建成静态文件，以便上传到Gitee Pages上。Hexo在构建是，是根据所选主题中对应的[ejs模版](https://ejs.co)，填充所需参数（大部分来自yml文件和Markdown文件头部信息）和文章内容之后，就会生成HTML文件。
+当你写好了一篇博客文章之后，就需要构建成静态文件，以便上传到Gitee Pages上。Hexo在构建时，是根据所选主题中对应的[ejs模版](https://ejs.co)，填充所需参数（大部分来自yml文件和Markdown文件头部信息）和文章内容之后，就会生成HTML文件。
 
-生成HTML文件后，可以通过使用部署插件hexo-deployer-git，将生成的public中的文件自动上传到指定的git上，上传之前现在_config.yml中配置Git相关信息。
+生成HTML文件后，可以通过使用部署插件hexo-deployer-git，将生成的public目录中的文件自动上传到指定的git上，上传之前需要先在_config.yml中配置Git相关信息。
 
 ```yml
 # 项目根目录下的_config.yml文件
@@ -106,4 +106,4 @@ npm run deploy
 }
 ```
 
-这样就完成了博客的构建和上传。上传完之后需要注意下，Gitee Pages并不支持自动更新你上传的内容，你需要手动进到项目中的Pages服务，点击更新进行手动更新。或许可以直接集成到d命令中，push完之后直接调用Pages的更新借款。这个等以后有时间了再来折腾下这里。
+这样就完成了博客的构建和上传。上传完之后需要注意下，Gitee Pages并不支持自动更新你上传的内容，你需要手动进到项目中的Pages服务，点击更新进行手动更新。或许可以直接集成到d命令中，push完之后直接调用Pages的更新接口。这个等以后有时间了再来折腾下。
