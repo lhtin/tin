@@ -4,8 +4,9 @@
   "scripts": {
     "build": "hexo generate",
     "clean": "hexo clean",
-    "deploy": "npm run clean && npm run build && hexo deploy",
-    "server": "hexo server"
+    "deploy": "hexo deploy",
+    "server": "hexo server",
+    "d": "npm run clean && npm run build && npm run deploy"
   },
   "hexo": {
     "version": "4.2.1"
