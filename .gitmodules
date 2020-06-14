@@ -1,0 +1,3 @@
+[submodule "themes/hexo-theme-landscape"]
+	path = themes/hexo-theme-landscape
+	url = https://gitee.com/lhtin/hexo-theme-landscape.git
