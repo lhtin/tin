@@ -49,7 +49,7 @@ highlight:
   line_number: true
   auto_detect: false
   tab_replace: '  '
-  wrap: true
+  wrap: false
   hljs: false
 
 # Home page setting
@@ -93,7 +93,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: hexo-theme-landscape
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
