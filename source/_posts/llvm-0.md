@@ -90,7 +90,8 @@ cmake --build . --target doxygen-llvm // 编译LLVM API文档
   - `clang -S -emit-llvm input.c -o out.ll`：生成人可读的LLVM IR
   - `clang -c -emit-llvm input.c -o out.bc`：生成二进制LLVM IR，也可以不加`-c`，默认编译为二进制IR
 - [opt](https://llvm.org/docs/CommandGuide/opt.html)
-  - `opt -load-pass-plugin=libHelloWorld.dylib -passes="hello-world" out.ll`：使用HelloWorld Pass对`out.ll`进行处理。注意这是新的单独调用Pass的方式，老的方式为：`opt -load libHelloWorld.dylib -legacy-hello-world out.ll`
+  - `opt -load-pass-plugin=libHelloWorld.dylib -passes="hello-world" a.ll`：使用HelloWorld Pass对`out.ll`进行处理。注意这是新的单独调用Pass的方式，老的方式为：`opt -load libHelloWorld.dylib -legacy-hello-world a.ll`
+  - `opt -analyze -view-cfg a.ll` 生成控制流程图（Control-flow graph），可以很方便的查看函数中的各种BB及BB直接的跳转。
 - [llvm-as](https://llvm.org/docs/CommandGuide/llvm-as.html)、[llvm-dis](https://llvm.org/docs/CommandGuide/llvm-dis.html)
   - `llvm-as a.ll -o a.bc`：将人可读的LLVM IR编译为二进制LLVM IR
   - `llvm-dis a.bc -o a.ll`：将二进制LLVM IR反编译为人可读的LLVM IR
@@ -100,10 +101,11 @@ cmake --build . --target doxygen-llvm // 编译LLVM API文档
   - `lli a.ll`：直接解释执行LLVM IR
 - [llvm-link](https://llvm.org/docs/CommandGuide/llvm-link.html)
   - `llvm-link -S add.ll main.ll -o all.ll`：链接多个LLVM IR为一个LLVM IR文件，`-S`表示输出的为人可读的LLVM IR，默认为二进制LLVM IR
-- [llvm-config](https://llvm.org/docs/CommandGuide/llvm-config.html)：给依赖LLVM的项目提供支持，输出LLVM库的头文件地址、库文件地址、库列表
+- [llvm-config](https://llvm.org/docs/CommandGuide/llvm-config.html)：使用`llvm-config --help`查看帮助。给依赖LLVM的项目提供支持，输出LLVM库的头文件地址、库文件地址、库列表。
   - `llvm-config --cxxflags`：生成编译时的头文件库参数，比如在我电脑上会输出`-I/usr/local/Cellar/llvm/10.0.0_3/include -std=c++14 -stdlib=libc++  -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS`
   - `llvm-config --ldflags`：生成链接时的LLVM库文件地址，比如在我电脑上会输出`-L/usr/local/Cellar/llvm/10.0.0_3/lib -Wl,-search_paths_first -Wl,-headerpad_max_install_names`
-  - `llvm-config --libs`：生成LLVM提供的库名称，结合`llvm-config --ldflags`，就可以让链接器找到对应的库文件
+  - `llvm-config --libs`：生成LLVM提供的库名称，结合`llvm-config --ldflags`，就可以让链接器找到对应的库文件。在`--libs`后面还可以添加各种组件名称，不添加表示所有组件。比如`--libs core native`，则只会输出core和native组件相关的库。通过下面的`llvm-config --components`命令可以列举出所有的LLVM组件列表
+  - `llvm-config --components`：输出所有的LLVM组件
 
 官方文档参考：
 
