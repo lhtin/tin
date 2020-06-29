@@ -78,12 +78,6 @@ cmake --build . --target doxygen-llvm // 编译LLVM API文档
 
 
 
-## LLVM项目结构简介
-
-// TODO
-
-
-
 ## 常用LLVM命令
 
 - clang
@@ -110,4 +104,10 @@ cmake --build . --target doxygen-llvm // 编译LLVM API文档
 官方文档参考：
 
 - [LLVM Command Guide](https://llvm.org/docs/CommandGuide/index.html)：命令行工具使用说明
+
+
+
+## LLVM项目结构简介
+
+// TODO
 
