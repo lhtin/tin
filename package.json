@@ -6,12 +6,13 @@
     "clean": "hexo clean",
     "deploy": "hexo deploy",
     "server": "hexo server",
-    "d": "npm run clean && npm run build && npm run deploy && npx gitee build-pages --config=./gitee_open_api.json"
+    "d": "npm run clean && npm run build && npm run deploy && gitee build-pages --config=./gitee_open_api.json"
   },
   "hexo": {
     "version": "4.2.1"
   },
   "dependencies": {
+    "gitee": "^1.0.4",
     "hexo": "^4.2.1",
     "hexo-deployer-git": "^2.1.0",
     "hexo-generator-archive": "^1.0.0",
