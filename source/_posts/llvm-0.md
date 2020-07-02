@@ -20,7 +20,7 @@ excerpt: 本文学习LLVM的第0篇文章，介绍LLVM项目的一些内容，�
    
 2. 克隆LLVM仓库：`git clone https://github.com/llvm/llvm-project`
 
-   如果国内clone太慢，也可以使用我在Gitee上创建的镜像仓库`https://gitee.com/github-repos/llvm-project`（注意：镜像仓库的内容可能会有延后，因为目前需要我手动点击同步）
+   如果国内clone太慢，也可以使用Gitee提供的镜像仓库`https://gitee.com/mirrors/LLVM`（注意：镜像仓库目前每天同步一次，所以内容会有延后）
 
 3. 创建构建目录，用于存放构建系统文件和构建出来的东西，比如在项目的根目录创建：`mkdir build`，然后进到构建目录： `cd build`
 
@@ -58,7 +58,7 @@ excerpt: 本文学习LLVM的第0篇文章，介绍LLVM项目的一些内容，�
 
 ```shell
 git clone https://github.com/llvm/llvm-project
-// Gitee源：git clone https://gitee.com/github-repos/llvm-project
+// Gitee源：git clone https://gitee.com/mirrors/LLVM
 cd llvm-project && mkdir build && cd build
 cmake -G Ninja\
   -DLLVM_ENABLE_PROJECTS="clang;libcxx"\
