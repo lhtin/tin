@@ -4,17 +4,17 @@
 
 # Site
 title: 01的世界
-subtitle: 计算机的世界没有秘密
+subtitle: 计算机的世界没有秘密。
 description: 这里有关于计算机的方方面面
 keywords: 01的世界
 author: tintin
-author_url: https://gitee.com/lhtin
+author_url: https://github.com/lhtin
 language: zh-CN
 timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://lhtin.gitee.io
+url: https://tintin.dev
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
