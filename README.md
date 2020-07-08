@@ -1,4 +1,16 @@
-# Todo List
+## Todo List
+
+- 最新打算学习的课程
+
+  - [从0到1构建计算机硬件和软件](https://www.nand2tetris.org)
+
+  - [Enflame编译优化培训(基于DCC888)](https://space.bilibili.com/482245901/video)
+  - [静态程序分析](https://pascal-group.bitbucket.io/teaching.html)
+  - [极客时间直播视频：从语言编译器源码入手，编译原理该这么学](https://www.bilibili.com/video/BV1Yz4y197Na)
+
+
+
+## 文章计划
 
 - 网络协议
   - TCP/UDP协议
@@ -7,6 +19,7 @@
   - HTTP2协议
   - HTTP3协议
 - LLVM
+  - ABI
   - SSA and LLVM IR
   - LLVM Pass
   - 使用LLVM实现一门Lambda演算语言
@@ -46,16 +59,6 @@
     FunctionCallee getOrInsertFunction(StringRef Name, FunctionType *T);
   ```
 
-
-- 分支release/10.x，文件：llvm/docs/BugpointRedesign.md，第36行cluttered前面不应该有空格，需要去掉，否则编译文档时会报错。
-
-  ```
-  ### Command-Line Options
-  We are proposing to reduce the plethora of bugpoint’s options to just two: an
-  interesting-ness test and the arguments for said test, similar to other delta
-  reduction tools such as CReduce, Delta, and Lithium; the tool should feel less
-   cluttered（这里）, and there should also be no uncertainty about how to operate it.
-  ```
 
 - `cmake --build . --target check-all` 报错
 

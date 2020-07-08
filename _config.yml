@@ -105,4 +105,4 @@ deploy:
 
 baidu_analytics: 2cdbc7958f6df4fec3751794de6e9c63
 google_analytics: UA-131906119-2
-disqus_shortname: tintin
+# disqus_shortname: tintin
