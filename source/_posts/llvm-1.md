@@ -41,18 +41,18 @@ excerpt: 按：本文是我学习LLVM官方教程My First Language Frontend with
 语言BNF定义如下：
 
 ```
-Program 			-> FunDef | ExternFun | TopLevelExpr
-FunDef 				-> "def" ident "(" FormalArgs ")" Expr ";"
-ExternFun 		-> "extern" ident "(" FormalArgs ")" ";"
-FormalArgs 		-> ε | ident | ident FormalArgs
+Program       -> FunDef | ExternFun | TopLevelExpr
+FunDef        -> "def" ident "(" FormalArgs ")" Expr ";"
+ExternFun     -> "extern" ident "(" FormalArgs ")" ";"
+FormalArgs    -> ε | ident | ident FormalArgs
 TopLevelExpr  -> Expr ";"
-Expr 					-> num | ident | ident "(" ActualArgs ")" 
+Expr          -> num | ident | ident "(" ActualArgs ")" 
               |  Expr Op Expr | "(" Expr ")"
-Op 						-> "<" | "-" | "+" | "*"
-ActualArgs 		-> ε | ident | ident "," ActualArgs
-ident 				-> [a-zA-Z][a-zA-Z0-9]*
-num 					-> [0-9.]+
-comment 			-> "#" [^\n\r]*
+Op            -> "<" | "-" | "+" | "*"
+ActualArgs    -> ε | ident | ident "," ActualArgs
+ident         -> [a-zA-Z][a-zA-Z0-9]*
+num           -> [0-9.]+
+comment       -> "#" [^\n\r]*
 ```
 
 示例代码：
@@ -237,7 +237,7 @@ void InitializeModuleAndPassManager(void) {
 
 ```
 ...
-Expr 					-> num | ident | ident "(" ActualArgs ")" 
+Expr          -> num | ident | ident "(" ActualArgs ")" 
               |  Expr Op Expr | "(" Expr ")"
               |  "if" Expr "then" Expr "else" Expr
               |  "for" ident "=" Expr "," Expr "," Expr "in"
@@ -328,7 +328,7 @@ Variable->addIncoming(NextVar, LoopEndBB);
 
 ```
 ...
-FunDef 				-> "def" ident "(" FormalArgs ")" Expr ";"
+FunDef        -> "def" ident "(" FormalArgs ")" Expr ";"
               |  "def" "unary" CustomOp "(" Expr ")" Expr ";"
               |  "def" "binary" CustomOp num "(" Expr Expr ")" Expr ";"
 CustomOp      -> [.]+
@@ -366,15 +366,15 @@ def binary | 5 (LHS RHS)
 语言最新的BNF表示（因为后面的章节没有再对语法有改动了，所以这里给出完整的语法，方便查看）：
 
 ```
-Program 			-> FunDef | ExternFun | TopLevelExpr
-FunDef 				-> "def" ident "(" FormalArgs ")" Expr ";"
+Program       -> FunDef | ExternFun | TopLevelExpr
+FunDef        -> "def" ident "(" FormalArgs ")" Expr ";"
               |  "def" "unary" CustomOp "(" Expr ")" Expr ";"
               |  "def" "binary" CustomOp num "(" Expr Expr ")" Expr ";"
 CustomOp      -> [.]+
-ExternFun 		-> "extern" ident "(" FormalArgs ")" ";"
-FormalArgs 		-> ε | ident | ident FormalArgs
+ExternFun     -> "extern" ident "(" FormalArgs ")" ";"
+FormalArgs    -> ε | ident | ident FormalArgs
 TopLevelExpr  -> Expr ";"
-Expr 					-> num | ident | ident "(" ActualArgs ")" 
+Expr          -> num | ident | ident "(" ActualArgs ")" 
               |  Expr Op Expr | "(" Expr ")"
               |  "if" Expr "then" Expr "else" Expr
               |  "for" ident "=" Expr "," Expr "," Expr "in"
@@ -382,11 +382,11 @@ Expr 					-> num | ident | ident "(" ActualArgs ")"
               |  ident "=" Expr
               |  "var" VarDef [ "," VarDef ] "in" Expr
 VarDef        -> ident | ident "=" Expr
-Op 						-> "<" | "-" | "+" | "*"
-ActualArgs 		-> ε | ident | ident "," ActualArgs
-ident 				-> [a-zA-Z][a-zA-Z0-9]*
-num 					-> [0-9.]+
-comment 			-> "#" [^\n\r]*
+Op            -> "<" | "-" | "+" | "*"
+ActualArgs    -> ε | ident | ident "," ActualArgs
+ident         -> [a-zA-Z][a-zA-Z0-9]*
+num           -> [0-9.]+
+comment       -> "#" [^\n\r]*
 ```
 
 新增语法对应的示例代码：

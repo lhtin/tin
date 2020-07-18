@@ -1,6 +1,5 @@
 ---
 title: 本站建造过程记录
-comments: true
 date: 2020/06/14
 tag:
 - guide
