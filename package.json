@@ -5,7 +5,7 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
-    "server": "hexo server",
+    "start": "hexo server",
     "d": "npm run clean && npm run build && npm run deploy"
   },
   "hexo": {

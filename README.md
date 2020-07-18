@@ -1,12 +1,55 @@
 ## Todo List
 
-- 最新打算学习的课程
+最近给自己制定了一个大目标：**能够明白计算机的每个方面**。具体来说，就是让自己能回答以下的问题（同时列举出了我打算做的一些事情）：
 
-  - [从0到1构建计算机硬件和软件](https://www.nand2tetris.org)
+- 如何进行软件设计？软件工程、软件设计
+  - 专栏：[许式伟的架构课](https://time.geekbang.org/column/intro/166)
+  - 书：《重构》
+  - 书：《程序员修炼之道》
+  - ...
 
-  - [Enflame编译优化培训(基于DCC888)](https://space.bilibili.com/482245901/video)
-  - [静态程序分析](https://pascal-group.bitbucket.io/teaching.html)
+- 计算机硬件是如何执行程序的？CPU、内存、IO
+  - 课程：[Nand2Tetris Part 1](https://www.coursera.org/learn/build-a-computer)
+  - 课程：[Nand2Tetris Part 2](https://www.coursera.org/learn/nand2tetris2)
+  - 书：*The Elements of Computing Systems*
+  - 专栏：[深入浅出计算机组成原理](https://time.geekbang.org/column/intro/170)
+  - ...
+
+- 编译器和程序静态分析是什么？编译、代码分析
+  - 编译器实现：[LLVM](https://llvm.org)
+  - 编译器实现：[Chez Scheme](https://github.com/cisco/ChezScheme)
+  - 课程：[静态程序分析](https://pascal-group.bitbucket.io/teaching.html)
+  - 课程：[Enflame编译优化培训(基于DCC888)](https://space.bilibili.com/482245901/video)
+  - 书：《编译器设计》
   - [极客时间直播视频：从语言编译器源码入手，编译原理该这么学](https://www.bilibili.com/video/BV1Yz4y197Na)
+  - ...
+
+- 操作系统是什么？硬件管理、软件管理
+  - 操作系统：Linux
+  - 专栏：[趣谈 Linux 操作系统](https://time.geekbang.org/column/intro/164)
+  - 实现一个最小操作系统
+  - 熟练使用 Linux
+  - ...
+- 计算机网络是什么？TCP/IP协议、各种协议的优缺点
+  - 专栏：[趣谈网络协议](https://time.geekbang.org/column/intro/85)
+  - 专栏：[透视HTTP协议](https://time.geekbang.org/column/intro/189)
+  - ...
+
+
+
+计算机之外的学习计划
+
+- 家庭
+  - 陪伴的快乐
+  - 陪妻子和儿子一起成长、共同做一些事情
+  - 如果儿子喜欢的话，跟儿子讨论计算机和经济学
+- 经济学
+  - 科学方法论
+  - 需求定律
+  - 李俊慧的经济学
+  - 李俊慧的经济学-第二季
+  - 《经济学讲义》
+  - 《经济解释》
 
 
 
