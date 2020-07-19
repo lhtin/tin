@@ -10,6 +10,8 @@
 
 - 计算机硬件是如何执行程序的？CPU、内存、IO
   - 课程：[Nand2Tetris Part 1](https://www.coursera.org/learn/build-a-computer)
+  - 文章：[从零开始理解CPU](https://www.bilibili.com/read/cv1982755/)
+  - 文章：[非门，与非门，或非门](https://zhuanlan.zhihu.com/p/34974464)
   - 课程：[Nand2Tetris Part 2](https://www.coursera.org/learn/nand2tetris2)
   - 书：*The Elements of Computing Systems*
   - 专栏：[深入浅出计算机组成原理](https://time.geekbang.org/column/intro/170)
