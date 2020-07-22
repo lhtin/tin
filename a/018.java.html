@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Java笔记</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>Java 笔记</h1>
+<p>阅读材料：</p>
+<ul>
+<li><a href="http://docs.oracle.com/javase/tutorial/">The Java Tutorials</a></li>
+</ul>
+<h2>Getting Started</h2>
+<h3>About the Java Technology</h3>
+<p>Java technology is both a programming language and a platform.</p>
+<h4>The Java Programming Language</h4>
+<p>Java 语言的特点: Simple, Architecture neutral, Object oriented, Portable, Distributed, High performance, Multithreaded, Robust, Dynamic, Secure. Each of the buzzwords explained in <a href="http://www.oracle.com/technetwork/java/langenv-140151.html">The Java Language Environment</a></p>
+<p><code>file.java</code> -- 由 javac 编译 -&gt; <code>file.class</code>(bytecode) -- 由 Java VM 运行 -&gt; 得到运行结果</p>
+<p>[Java SE HotSpot at a Glance](Java SE HotSpot at a Glance)</p>
+<h4>The Java Platform</h4>
+<p>A <em>platform</em> is the hardware or software environment in which a program runs.</p>
+<p>Java 平台是一个软件平台。</p>
+<p>The Java platform has two components:</p>
+<ul>
+<li>The Java Virtual Machine</li>
+<li>The Java Application Programming Interface (API)</li>
+</ul>
+<p>作为平台独立的运行环境，Java 平台比原生平台运行的更慢些。</p>
+<h3>What can Java Technology Do?</h3>
+<h3>How Will Java Technology Change My Life?</h3>
+<h2>Learning the Java Language</h2>
+<h3>Object-Oriented Programming Concepts</h3>
+<h4>What Is an Object?</h4>
+<p>对象由**状态(fields)<strong>和相应的</strong>行为(methods)**组成。是对真实世界中的物体的模拟。</p>
+<p>面向对象编程的基础概念是<strong>数据封装(data encapsulation)</strong>，也就是说对象把自己的内部变量隐藏，只通过自己的方法和外界进行交互。</p>
+<p>对象化所带来的好处：模块化、信息隐藏、代码复用、可插拔性和易于调试。</p>
+<h4>What Is a Class?</h4>
+<p>类是对象创建时所参考的蓝图，对象也可以叫做类的实例。</p>
+<h4>What Is Inheritance?</h4>
+<p><strong>继承</strong>用于抽象不同类之间的相似之处，使类之间层次清楚，代码易读。</p>
+<h4>What Is an Interface?</h4>
+<p>对象通过<strong>接口</strong>与外界（其他对象）进行交互。</p>
+<h4>What Is a Package?</h4>
+<p><strong>包</strong>是用于组织一系列相关<strong>类</strong>和<strong>接口</strong>的命名空间。</p>
+<h2>Language Basics</h2>
+<h3>Variables</h3>
+<p>Java 中存在以下几种变量：</p>
+<ul>
+<li><strong>实例变量 (Instance Variables, Non-Static Fields)</strong></li>
+<li><strong>类变量 (Class Variables, Static Fields)</strong>：使用 <code>static</code> 修饰符(modifiers)修饰的 fields</li>
+<li><strong>局部变量 (Local Variables)</strong></li>
+<li><strong>参数 (Parameters)</strong></li>
+</ul>
+<h3>Primitive Data Types</h3>
+<blockquote>
+<p>The Java programming language is statically-typed, which means that all variables must first be declared before they can be used. This involves stating the variable's type and name.</p>
+</blockquote>
+<p>八种原始数据类型：<code>byte</code>(8-bit), <code>short</code>(16-bit), <code>int</code>(32-bit), <code>long</code>(64-bit), <code>float</code>(32-bit IEEE 754), <code>double</code>(64-bit IEEE 754), <code>boolean</code>, <code>char</code>(16-bit Unicode character).</p>
+<pre><code>int decVal = 26; // 十进制
+int hexVal = 0x1a; // 十六进制
+int binVal = 0b11010; // 二进制
+</code></pre>
+<h3>Array</h3>
+<pre><code>int[] a = new int[10];
+
+int[] b = {1, 2, 3, 4};
+
+int[][] xy = {
+    {1, 2},
+    {2, 4},
+    {3, 9}
+}
+</code></pre>
+<h3>Operators</h3>
+<h3>Expressions, Statements, and Blocks</h3>
+<p><strong>语句</strong>包括<strong>表达式语句</strong>、<strong>声明语句</strong>、<strong>流程控制语句</strong>。</p>
+<h3>Constrol Flow Statement</h3>
+<p>常见流程控制语句：<code>if-then</code>, <code>switch</code>, <code>while</code>, <code>do-while</code>, <code>for</code>.</p>
+<h2>Classes and Objects</h2>
+<h3>Classes</h3>
+<h4>Declaring Member Variables</h4>
+<p>字段<strong>访问修饰符</strong>(Access Modifiers)：</p>
+<ul>
+<li><code>public</code>：所有类都可以访问</li>
+<li><code>private</code>：只能字段所属类访问</li>
+</ul>
+<h4>Defining Methods</h4>
+<p>方法<strong>重载</strong>(overloading)</p>
+<blockquote>
+<p>Note: Overloaded methods should be used sparingly, as they can make code much less readable.</p>
+</blockquote>
+<h4>Providing Constructors for Your Classes</h4>
+<p>如果没有给类提供<strong>构造器</strong>，Java 编译器会自动补加一个默认的构造器，该构造器会调用父类的无参构造器。因此，如果父类提供无参构造器，编译器将会报错。</p>
+<p>形参(parameter)，实参(argument)。</p>
+<h4>Controlling Access to Members of a Class</h4>
+<p><strong>成员</strong>(members)指类中的字段和方法，包括类成员和实例成员。</p>
+<p>修饰符对成员的访问控制权限表：</p>
+<table>
+<thead>
+<tr>
+<th>Modifier</th>
+<th>Class</th>
+<th>Package</th>
+<th>Subclass</th>
+<th>World</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>public</code></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr>
+<td><code>protected</code></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>N</td>
+</tr>
+<tr>
+<td><em>no modifier</em></td>
+<td>Y</td>
+<td>Y</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr>
+<td><code>private</code></td>
+<td>Y</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+</tr>
+</tbody>
+</table>
+<p><strong>修饰符</strong>(modifier)使用时请遵循最严原则，也就是说优先使用 <code>private</code>，有理由使用其它修饰符除外。除了常量外，避免使用 <code>public</code> 修饰符。使用 <code>public</code> 修饰符会导致暴露过多的细节给类使用者，限制了类的具体实现，影响了之后修改代码的灵活性。</p>
+<h4>Understanding Class Members</h4>
+<p>类变量可以直接通过类访问到，而不需要先初始化。类方法也是如此，并且类方法的调用只建议从类上调用，而不要在实例上调用，方便和实例方法做区分。</p>
+<p>类方法只能访问类变量和类方法，而实例方法可以访问实例变量、实例方法、类变量、类方法。</p>
+<p>通过 <code>static</code> 和 <code>final</code> 修饰符定义常量。常量在编译成字节码之后，就固定不变了。也就是说，假如修改了某个类中的常量，其他使用这个常量的类也需要重现编译。</p>
+<h3>Nested Classes</h3>
+<p>为什么要使用嵌套类：</p>
+<ul>
+<li>对类进行逻辑上的分类：只在某个类中使用的类就声明在这个类里面</li>
+<li>增加封装性：嵌套类可以访问包裹类中的所有成员</li>
+<li>使代码易读和维护：代码上挨的更近</li>
+</ul>
+<p>注：我觉得这几点还有待商榷。</p>
+<p>嵌套类分为 Static Nested Classes 和 Inner Classes。</p>
+<blockquote>
+<p>Note: A static nested class interacts with the instance members of its outer class (and other classes) just like any other top-level class. In effect, a static nested class is behaviorally a top-level class that has been nested in another top-level class for packaging convenience.</p>
+</blockquote>
+<p>方法中定义类(Local and Anonymous Classes)</p>
+<h3>Lambda Expressions</h3>
+<blockquote>
+<p>The operations filter, map, and forEach are <em>aggregate operations</em>.</p>
+</blockquote>
+<p>注意，Lambda 表达式不会引入新的作用域，也就意味着在表达式中不能重复定义外面出现过的变量。</p>
+<h3>When to Use Nested Classes, Local Classes, Anonymous Classes, and Lambda Expressions</h3>
+<h3>Enum Types</h3>
+<pre><code>public enum Planet {
+    MERCURY (3.303e+23, 2.4397e6),
+    VENUS   (4.869e+24, 6.0518e6),
+    EARTH   (5.976e+24, 6.37814e6),
+    MARS    (6.421e+23, 3.3972e6),
+    JUPITER (1.9e+27,   7.1492e7),
+    SATURN  (5.688e+26, 6.0268e7),
+    URANUS  (8.686e+25, 2.5559e7),
+    NEPTUNE (1.024e+26, 2.4746e7);
+
+    private final double mass;   // in kilograms
+    private final double radius; // in meters
+    Planet(double mass, double radius) {
+        this.mass = mass;
+        this.radius = radius;
+    }
+    private double mass() { return mass; }
+    private double radius() { return radius; }
+
+    // universal gravitational constant  (m3 kg-1 s-2)
+    public static final double G = 6.67300E-11;
+
+    double surfaceGravity() {
+        return G * mass / (radius * radius);
+    }
+    double surfaceWeight(double otherMass) {
+        return otherMass * surfaceGravity();
+    }
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.err.println(&quot;Usage: java Planet &lt;earth_weight&gt;&quot;);
+            System.exit(-1);
+        }
+        double earthWeight = Double.parseDouble(args[0]);
+        double mass = earthWeight/EARTH.surfaceGravity();
+        for (Planet p : Planet.values())
+           System.out.printf(&quot;Your weight on %s is %f%n&quot;,
+                             p, p.surfaceWeight(mass));
+    }
+}
+</code></pre>
+<h2>Annotations</h2>
+<p><strong>注解</strong>(<em>annotation</em>)，给程序提供元数据，但不是程序的一部分。</p>
+<p>作用：</p>
+<ul>
+<li>给编译器提供信息</li>
+<li>编译和部署时处理，生成代码，XML文件等</li>
+<li>运行时处理</li>
+</ul>
+<p>一些注解用于替代代码中的<strong>注释</strong>(<em>comment</em>)。</p>
+<p>一些注解用于其他注解上面，称为<strong>元注解</strong>(<em>meta-annotation</em>)。</p>
+<h2>Interfaces</h2>
+<p><strong>接口</strong>(<em>interface</em>)是<strong>引用类型</strong>(<em>reference type</em>)，可以包含<strong>抽象方法</strong>(<em>abstract method</em>)、<strong>默认方法</strong>(<em>default method</em>)、<strong>静态方法</strong>(<em>static method</em>)、<strong>常量</strong>(<em>constant</em>)。</p>
+<p>当需要扩充接口，但又不希望之前实现该接口的类进行修改时，可以通过定义默认方法或者静态方法来达到目的。</p>
+<h2>Inheritance</h2>
+<p>子类<strong>继承</strong>(<em>inheritance</em>*)父类中被 <code>public</code> 和 <code>protected</code> 修饰的成员(members)。如果子类和父类属于同一个 package，那么子类还继承了父类中的 <em>package-private</em> 成员。</p>
+<p>作为所有类的祖先 Object 类（它自己没有父类了），它含有的以下方法会被继承：</p>
+<ul>
+<li><code>protected Object clone() throws CloneNotSupportedException</code></li>
+<li><code>public boolean equals(Object obj)</code></li>
+<li><code>protected void finalize() throws Throwable</code></li>
+<li><code>public final Class getClass()</code></li>
+<li><code>public int hashCode()</code></li>
+<li><code>public String toString()</code></li>
+</ul>
+<h3>Polymorphism</h3>
+<p><strong>多态</strong>(<em>polymorphism</em>)</p>
+<blockquote>
+<p>The Java virtual machine (JVM) calls the appropriate method for the object that is referred to in each variable. It does not call the method that is defined by the variable's type. This behavior is referred to as <em>virtual method invocation</em> and demonstrates an aspect of the important polymorphism features in the Java language.</p>
+</blockquote>
+<h2>Packages</h2>
+<blockquote>
+<p>Definition: A <em>package</em> is a grouping of related types providing access protection and name space management. Note that <em>types</em> refers to classes, interfaces, enumerations, and annotation types.</p>
+</blockquote>
+<blockquote>
+<p>For convenience, the Java compiler automatically imports two entire packages for each source file: (1) the java.lang package and (2) the current package (the package for the current file).</p>
+</blockquote>
+<blockquote>
+<p>Both the compiler and the JVM construct the path to your .class files by adding the package name to the <em>class path</em>.</p>
+</blockquote>
+<h2>泛型(Generics)</h2>
+<blockquote>
+<p>In a nutshell, generics enable <em>types</em> (classes and interfaces) to be parameters when defining classes, interfaces and methods. Much like the more familiar <em>formal parameters</em> used in method declarations, type parameters provide a way for you to re-use the same code with different inputs. The difference is that the inputs to formal parameters are values, while the inputs to type parameters are types.</p>
+</blockquote>
+<blockquote>
+<p>Code that uses generics has many benefits over non-generic code:</p>
+<ul>
+<li>Stronger type checks at compile time.</li>
+<li>Elimination of casts.</li>
+<li>Enabling programmers to implement generic algorithms.</li>
+</ul>
+</blockquote>
+<p>动态指定类型，可以在类中，也可以在方法中。</p>
+
+
+</body>
+</html>

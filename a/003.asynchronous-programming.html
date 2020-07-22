@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>异步编程</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>Promise与异步编程</h1>
+<p>本文目录：</p>
+<ol>
+<li>何为异步编程；</li>
+<li>为什么需要异步编程；</li>
+<li>何为Promise；</li>
+<li>Promise有哪些优点？</li>
+</ol>
+<h2>何为异步编程</h2>
+<p>异步编程，是指在单线程中，为了避免阻塞而使用的一种编程模型。介绍异步编程前，先介绍单线程同步编程。</p>
+<p>本来，程序的执行，是按照代码所写的逻辑一步步执行下去的，不存在什么同步异步之分。然而，具体到实际中发现这样会导致代码被阻塞，浪费CPU资源。</p>
+<p>比如读取文件操作（假如读取文件是由文件读取器来真正读取的），当我们向文件读取器申请读取文件时，我们会因为等待结果而阻塞程序的执行，导致这段时间用于执行我们的程序的CPU资源空闲。为了高效的利用CPU，我们可能先是把xxx文件名给文件读取器，并要求它读完之后通知我们。在我们把文件名给文件读取器后，我们不等待结果的返回，而是继续向下执行其它操作，直到文件读取器通知文件读取完毕时才继续文件处理的操作。伪代码如下：</p>
+<pre><code class="language-js"><span class="hljs-comment">// 同步：</span>
+readFile
+doSomethingWidthFile
+doOtherThings
+
+<span class="hljs-comment">// 异步：</span>
+readFile(doSomethingWidthFile)
+doOtherThings
+</code></pre>
+<h2>为什么需要异步编程</h2>
+<p>正如“何为异步编程”小节中所说的。为了有效的利用异步编程，在执行一个由外部服务者提供的耗时操作时，我们不去等待结果的返回，而是让服务提供者通知我们。中间这段时间可以去做其它事情。</p>
+<h2>何为Promise</h2>
+<p>那么，Promise又是什么呢？简单说，一个Promise指某个操作的封装，维持了这个操作的状态（执行中，执行成功，执行失败）。并且Promise的状态要么从执行中转向执行成功，要么从执行中转向执行失败，一旦改变了状态，之后将一直不变。对于使用者来说，我们使用Promise提供的then接口注册执行成功的回调和执行失败的回调。当Promise状态发生转变时，会执行相应的回调，之后再注册的回调也就会马上执行。</p>
+<h2>Promise有哪些优点</h2>
+<p>优点1：使异步编程变得直观
+优点2：提前执行异步操作，之后很容易使用异步操作的结果
+优点3：通过简单的封装，可以做出串行、并行控制函数</p>
+
+
+</body>
+</html>

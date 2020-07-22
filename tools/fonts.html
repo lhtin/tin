@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>css字体列表</title>
+    <style>
+        .item {
+            margin: 0 auto;
+            padding: 30px 0;
+            max-width: 600px;
+            letter-spacing: 2px;
+            line-height: 180%;
+        }
+        .metadata {
+            font-family: 'PingFang SC';
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <p></p>
+        <p></p>
+    </div>
+<p><span></p>
+<script src="fonts.js"></script>
+<script>
+var template = '<h3>Concept（概念）</h3><p>A concept is an abstract idea representing the fundamental characteristics of what it represents. Concepts arise as abstractions or generalisations from experience or the result of a transformation of existing ideas.</p>'
++ '<p>采用抽象化的方式，从一群事物中提取出来的，反映这些事物之共同特性的思维单位。概念是人类对一个复杂的过程或事物的理解。从哲学的观念来说概念是思维的基本单位。</p>';
+
+var makeOne = function (font) {
+    var div = document.createElement('div');
+    div.className = 'item';
+    div.style.fontFamily = font.font_family;
+    div.innerHTML = template;
+
+    var p = document.createElement('p');
+    p.className = 'metadata';
+    p.innerHTML = font.name + ': ' + font.font_family;
+    div.appendChild(p);
+
+    document.body.appendChild(div);
+}
+fonts.forEach(makeOne);
+</script>
+</body>
+
+</html>

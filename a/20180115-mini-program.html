@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>分享（20180115）</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>分享：小程序开发入门</h1>
+<h2>小程序技术</h2>
+<ul>
+<li>小程序原理
+<ul>
+<li>视图层(WebView) <strong>&lt;=&gt;</strong> 逻辑层(JavaScriptCore)。两个层之间通过evaluateJavascript进行交互：逻辑层向视图层传递数据，视图层向逻辑层传递事件。</li>
+<li>视图层：wxml, wxss, <a href="https://mp.weixin.qq.com/debug/wxadoc/dev/framework/view/wxs/">wxs</a></li>
+<li>逻辑层：JS环境+微信API</li>
+</ul>
+</li>
+<li>封装了一些通用组件，简化了很多标签
+<ul>
+<li>swiper, picker, map, ...</li>
+<li><a href="https://mp.weixin.qq.com/debug/wxadoc/dev/component/">小程序组件</a></li>
+<li><a href="https://mp.weixin.qq.com/debug/wxadoc/dev/framework/custom-component/">自定义组件</a></li>
+</ul>
+</li>
+<li>JS环境新增了原生相关API，减去了浏览器相关的API
+<ul>
+<li>微信登录API，多媒体API，网络请求API，...</li>
+<li><a href="https://mp.weixin.qq.com/debug/wxadoc/dev/api/">小程序API</a></li>
+</ul>
+</li>
+<li>已知的一些问题（原生组件bug、能力缺失...）
+<ul>
+<li>部分组件是通过原生实现：input, canvas, map</li>
+<li>原生组件层级最高无法被遮盖、input聚焦失焦字体不一致、input定位不准</li>
+</ul>
+</li>
+<li>微信开发工具
+<ul>
+<li>预览、调试</li>
+<li>上传</li>
+</ul>
+</li>
+</ul>
+<h2>小程序项目</h2>
+<ul>
+<li>项目目录结构介绍</li>
+<li>兼容组件方案介绍
+<ul>
+<li>为什么引入？</li>
+</ul>
+</li>
+<li>发布运营等介绍
+<ul>
+<li>开发上传</li>
+<li>管理员提审发布</li>
+</ul>
+</li>
+<li>有待改进的地方
+<ul>
+<li>代码ES6+化</li>
+<li>模块化</li>
+</ul>
+</li>
+</ul>
+<h2>参考</h2>
+<ul>
+<li>https://mp.weixin.qq.com/s/9PID6UJsQyB06xdyOkEVOA</li>
+</ul>
+
+
+</body>
+</html>

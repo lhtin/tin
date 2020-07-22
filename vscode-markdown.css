@@ -1,0 +1,104 @@
+html {
+    font-size: 14px;
+}
+
+body {
+    margin: 0 auto;
+    padding: 3% 20px;
+    background-color: white;
+    font-family: Optima, "STHeiti", sans-serif;
+    color: black !important;
+    letter-spacing: 1px;
+}
+
+p {
+    line-height: 180%;
+    font-size: 1rem;
+}
+
+ol > li,
+ul > li {
+    margin: 10px 0;
+}
+
+/* contents */
+.contents {
+    margin: 0 auto;
+    max-width: 600px;
+}
+
+.contents .logo {
+    text-align: center;
+}
+
+ul.contents {
+    padding: 20px 0;
+    list-style: none;
+}
+ul.contents li a {
+    display: block;
+    margin: 10px 0;
+    padding: 5px;
+    text-align: center;
+    word-break: break-all;
+    cursor: pointer;
+    color: black;
+    background-color: white;
+    transition: background-color 0.3s ease;
+}
+ul.contents li a:hover {
+    color: white;
+    background-color: gray;
+}
+
+/* detail */
+
+h1, h2, h3 {
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 2rem;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid gray;
+}
+
+h3 {
+    font-size: 1.1rem;
+}
+
+code {
+    font-family: "PT Mono", Monaco, consolas, 'Courier New', monospace;
+    /*color: crimson;
+    background-color: white;*/
+}
+
+/*
+pre {
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    padding: 15px;
+    font-size: 12px;
+    overflow: auto;
+}
+
+pre code {
+    color: black;
+    line-height: 160%;
+}
+
+img {
+    max-width: 100%;
+}
+
+blockquote {
+    margin: 0;
+    border-left: 5px solid crimson;
+    padding: 5px 5px 5px 20px;
+    font-size: 14px;
+    background-color: aliceblue;
+}*/

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Angular2之HTTP模块</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>Angular2之HTTP模块</h1>
+<h2>引子：使用原生JS上传文件</h2>
+<p>参考：<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest">Using XMLHttpRequest(MDN)</a></p>
+<p>在单页应用中，上传文件只能通过浏览器提供的AJAX。AJAX结合FormData对象上传文件最简单，demo如下：</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"form"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>请输入文件名称：<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"filename"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>请选择文件：<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"file"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"file"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"btn"</span>&gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    <span class="hljs-keyword">var</span> btn = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'btn'</span>);
+    <span class="hljs-keyword">var</span> form = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'form'</span>);
+    btn.addEventListener(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+        <span class="hljs-keyword">var</span> formData = <span class="hljs-keyword">new</span> FormData(form);
+        formData.append(<span class="hljs-string">'extra'</span>, <span class="hljs-string">'而外信息'</span>);
+        <span class="hljs-keyword">var</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest();
+        xhr.open(<span class="hljs-string">'post'</span>, <span class="hljs-string">'/upload'</span>);
+        xhr.addEventListener(<span class="hljs-string">'load'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+            <span class="hljs-keyword">if</span> (xhr.status === <span class="hljs-number">200</span>) {
+                <span class="hljs-comment">// success</span>
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">// fail</span>
+            }
+        });
+        xhr.send(formData); <span class="hljs-comment">// 注意不能设置Content-Type</span>
+        e.preventDefault();
+    });
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<p>同时参考文章中提供了另外一种方式，这种方式需要使用AJAX和FileReader，相当于需要手动构造一个<code>Content-Type</code>为<code>multipart/form-data</code>格式的请求体（body）。由于FormData和FileReader支持的IE一致，所以完全没有必要使用这种复杂的方式。</p>
+<h2>HTTP模块如何上传文件</h2>
+<p>从上面的例子可以得知，使用FormData来上传文件时，不能设置头部的<code>Content-Type</code>字段。如果设置了这个字段，相当于引子中的第二种方式，需要手动构造特定格式的请求体。</p>
+<p>--未完--</p>
+
+
+</body>
+</html>

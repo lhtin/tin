@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redux详解</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>Redux详解</h1>
+<h2>Redux 是什么（What）</h2>
+<p>我们先来看下Redux是什么，官方文档上说“Redux是一个给JS应用使用的状态容器，并且这里的状态是可预测的”（Redux is a predictable state container for JavaScript apps）。也就是说，Redux是一个状态管理器，并且状态的变化可以记录和复现。管理JS应用状态的方式有很多种，Redux是一种。</p>
+<p>Redux包含action、reducer、store三个元素：</p>
+<ul>
+<li>action代表“发生了什么”（比如用户点击、请求返回了等），也就是代表某个<strong>事件</strong>。action使用一个纯JS对象表示，该对象必须含有一个<code>type</code>属性，用于表示事件的类型。其他属性用户可以自行添加。比如一个待办事项事件，可以增加一个<code>text</code>属性来表示待办事项的具体内容。</li>
+<li>reducer是一个响应action的JS函数，根据action更新state。reducer接收当前的状态（<code>currentState</code>）和一个action，返回下一个状态（<code>nextState</code>）。reducer必须是一个纯函数，即不能修改传入的参数，不能有任何副作用，并且每次调用同样的参数得到的返回值相同（也就是不能调用不纯的函数）。</li>
+<li>store是状态管理器对象，它提供<code>getState</code>方法获取当前状态，<code>dispatch</code>方法接受外界的action，<code>subscribe</code>方法监听状态的更新。其中<code>dispatch</code>的时候store内部会去调用reducer处理action，得到新的state。</li>
+</ul>
+<h2>Redux 怎么用（How）</h2>
+<p>基本使用方式：</p>
+<pre><code class="language-js"><span class="hljs-keyword">import</span> { createStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>
+
+<span class="hljs-comment">// action</span>
+<span class="hljs-keyword">const</span> ActionTypes = {
+  <span class="hljs-attr">ADD_TODO</span>: <span class="hljs-string">'add_todo'</span>, <span class="hljs-comment">// 添加一个todo</span>
+  TOGGLE: <span class="hljs-string">'toggle'</span> <span class="hljs-comment">// 修改todo的完成状态</span>
+}
+
+<span class="hljs-keyword">const</span> initialState = {
+  <span class="hljs-attr">todos</span>: []
+}
+
+<span class="hljs-comment">// reducer</span>
+<span class="hljs-keyword">const</span> todoApp = <span class="hljs-function">(<span class="hljs-params">state = initialState, action</span>) =&gt;</span> {
+  <span class="hljs-keyword">switch</span>(action.type) {
+    <span class="hljs-keyword">case</span> ActionTypes.ADD_TODO:
+      <span class="hljs-keyword">return</span> {
+        ...state,
+        <span class="hljs-attr">todos</span>: [
+          ...state.todos,
+          {
+            <span class="hljs-attr">text</span>: action.text,
+            <span class="hljs-attr">completed</span>: <span class="hljs-literal">false</span>
+          }
+        ]
+      }
+    <span class="hljs-keyword">case</span> ActionTypes.TOGGLE:
+      <span class="hljs-keyword">const</span> newTodos = state.todos.map(<span class="hljs-function">(<span class="hljs-params">item, index</span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span> (action.index === index) {
+          <span class="hljs-keyword">return</span> {
+            ...item,
+            <span class="hljs-attr">completed</span>: !item.completed
+          }
+        } <span class="hljs-keyword">else</span> {
+          <span class="hljs-keyword">return</span> item
+        }
+      })
+      <span class="hljs-keyword">return</span> {
+        ...state,
+        <span class="hljs-attr">todos</span>: newTodos
+      }
+    <span class="hljs-keyword">default</span>:
+      <span class="hljs-keyword">return</span> state
+  }
+}
+
+<span class="hljs-comment">// store</span>
+<span class="hljs-keyword">const</span> store = createStore(todoApp)
+
+<span class="hljs-comment">// playground</span>
+store.dispatch({
+  <span class="hljs-attr">type</span>: ActionTypes.ADD_TODO,
+  <span class="hljs-attr">text</span>: <span class="hljs-string">'这周写一篇Redux的文章'</span>
+})
+<span class="hljs-keyword">const</span> state1 = store.getState()
+<span class="hljs-comment">/*
+state1:
+{
+  todos: [
+    {
+      text: '这周写一篇Redux的文章',
+      completed: false
+    }
+  ]
+}
+*/</span>
+
+store.dispatch({
+  <span class="hljs-attr">type</span>: ActionTypes.ADD_TODO,
+  <span class="hljs-attr">text</span>: <span class="hljs-string">'练习Ukulele击弦一小时'</span>
+})
+<span class="hljs-keyword">const</span> state2 = store.getState()
+<span class="hljs-comment">/*
+state2:
+{
+  todos: [
+    {
+      text: '这周写一篇Redux的文章',
+      completed: false
+    },
+    {
+      text: '练习Ukulele击弦一小时',
+      completed: false
+    }
+  ]
+}
+*/</span>
+
+<span class="hljs-comment">// 一周后</span>
+store.dispatch({
+  <span class="hljs-attr">type</span>: ActionTypes.TOGGLE,
+  <span class="hljs-attr">index</span>: <span class="hljs-number">0</span>
+})
+store.dispatch({
+  <span class="hljs-attr">type</span>: ActionTypes.TOGGLE,
+  <span class="hljs-attr">index</span>: <span class="hljs-number">1</span>
+})
+<span class="hljs-keyword">const</span> state3 = store.getState()
+<span class="hljs-comment">/*
+state3:
+{
+  todos: [
+    {
+      text: '这周写一篇Redux的文章',
+      completed: true
+    },
+    {
+      text: '练习Ukulele击弦一小时',
+      completed: true
+    }
+  ]
+}
+*/</span>
+</code></pre>
+<p>上面的时候方式没有结合具体的框架，对于具体的框架，比如React来说，主要需要做一个桥梁将Redux的数据注入到需要的地方。一般通过<code>mapStateToProps</code>和<code>mapDispatchToProps</code>来做一个Redux state到React的映射。</p>
+<h2>为什么要引入 Redux（Why）</h2>
+<p>那么，为啥要引入 Redux 呢？</p>
+<p>从本质上来讲，Redux将赋值过程分成了两部分，一是程序员提交action，二是Redux做实际修改。和直接赋值相比，多了个提交action的环节，使用上变得繁琐了。对于程序员来说，只能通过提交符合规范的action，才能修改到想修改的内容。</p>
+<p>我个人觉得，引入Redux的好处有三点：一是对个人开发较复杂的应用来说，直接赋值的方式来管理应用状态会变的很繁琐，尤其是那种需要在多个分散位置修改同一个变量的情况，统一了修改数据的方式；二是对于多人协作开发应用来说，Redux就像一个共同准守的规范，统一了数据的来源，减少了沟通成本，提高了代码的可预测性；三是Redux提供的追踪状态变化的能力，使得调试很方便。</p>
+<p>但是，如果太追求Redux化的话，也会带来问题。比如将一个只在React组件（或者其他变量作用域不大的情况）使用到的变量，移到Redux中去。反而会带来理解成本的上升，阅读者需要寻找到action对应的reducer才能理解所要修改的变量。</p>
+<p>在我实际开发RN过程中，经常会遇到一个请求是放到页面组件里面还是放到Redux中去的问题。直接放在页面组件会比较清楚页面组件的内容和功能，放在Redux中的话，说明把页面组件当作一个纯粹的展示组件来看，个人觉得就增加了很多的理解成本（相当于将一个组件的逻辑拆成了两个组件来做，一个组件生成View的数据，一个组件展示这些数据）。另外一个问题是状态放在组件的state中还是Redux中的问题，个人觉得可以缓存的数据放在Redux中，一次使用的数据放在组件的state中。</p>
+<h2>参考</h2>
+<ul>
+<li><a href="https://redux.js.org">Redux官方文档</a></li>
+<li><a href="https://daveceddia.com/what-does-redux-do">What Does Redux Do? (and when should you use it?)</a></li>
+<li><a href="https://medium.com/@dan_abramov/you-might-not-need-redux-be46360cf367">You Might Not Need Redux</a></li>
+</ul>
+
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Little Schemer 4th Notes（2016-7-20）</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1><em>The Little Schemer 4th</em> 读书笔记</h1>
+<h2>总结</h2>
+<p>本书目标：教读者学习递归编程</p>
+<p>教学方式：从最基本的数据结构atom开始讲起，介绍多种数据结构；然后讲解如何对数据结构进行操作以及十条戒律；再介绍停机问题，和Y算子去实现递归；最后应用递归方法实现了一个解释器。</p>
+<h2>具体内容</h2>
+<h3>各种数据结构：atom, list, S-expression</h3>
+<h4>数据结构</h4>
+<p>atom: 原子
+list: 小括号包裹的元素为atom或list
+S-expression: atom或list
+lat: list of atoms
+number: 数字atom，或者理解为number个空表组成的表
+tup: list of numbers</p>
+<h4>函数</h4>
+<p>list：car, cdr, cons, null?, first, second, build, third</p>
+<p>S-expression：atom?, pair?</p>
+<p>检查两个非数字atom是否相等：eq?</p>
+<p>检查两个atom是否相等：eqan?</p>
+<p>lat: lat?, member?, rember, insertR, insertL, subst, subst2, multirember, multiinsertR, multiinsertL, multisubst, pick, rempick, no-nums, all-nums, accur,
+firsts, set?, makeset, subset?, eqset?, intersect?, intersect, union, diffsect, intersectall,</p>
+<p>number: add1, sub1, zero?, +, -, *, /, &gt;, &lt;, =, number?, one?,</p>
+<p>tup: addtup, tup+,</p>
+<p>list: <code>rember*</code>, <code>insertR*</code>, <code>insertL*</code>, <code>occur*</code>,<code>subst*</code>, <code>member*</code>, <code>leftmost</code>, <code>eqlist?</code>,</p>
+<p>S-expression: <code>equal?</code></p>
+<p>rel: list of pairs, <code>revrel</code>, <code>revpair</code>, <code>firsts</code>, <code>seconds</code>,</p>
+<h4>表达与值</h4>
+<p>算术表达式：numbered?, value, 1st-sub-exp, 2nd-sub-exp, operator,</p>
+<p>表示数字的方法有很多种，但是数字的概念只有一种。为了向别人描述数字的概念，需要寻找一种具体表示的方法。最常见的是使用阿拉伯数字表示。但是也可以使用其它方法，比如<code>(() ())</code>表示2。</p>
+<h4>集合</h4>
+<h4>使用帮助函数（进行抽象）</h4>
+<h3>编写函数处理这些类型的数据：搜索、构造、修改、提取...</h3>
+<h3>如何编写递归函数？：遵守十大戒律</h3>
+<ol>
+<li></li>
+</ol>
+<h3>函数一定会结束？：total和partial函数，停机问题</h3>
+<h3>如何在没有define功能下实现递归？：Y算子</h3>
+<h3>制作一个解释器：递归函数的应用</h3>
+<h2>摘录</h2>
+
+
+</body>
+</html>

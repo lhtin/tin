@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>分享（20171120）</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>《你不知道的JS》笔记2——<code>this</code>和原型</h1>
+<p>注：这是《YDKJS》的第二本书《<code>this</code>和原型》的读书笔记，本次分享主要介绍原型相关内容。</p>
+<h2>分享内容</h2>
+<ol>
+<li><code>this</code></li>
+<li>传统的Class</li>
+<li>JS中的<code>[[Prototype]]</code></li>
+<li>用<code>[[Prototype]]</code>模拟Class</li>
+<li>不再模拟</li>
+</ol>
+<h2>1. <code>this</code></h2>
+<p>上一次分享介绍了JS中的词法作用域，提到了代码（主要是函数）中的变量指向是在编译阶段确定的。不过有一个例外没有讲到，那就是函数中的<code>this</code>变量，<code>this</code>变量的指向要到运行阶段才被确定。</p>
+<p>为什么要引入<code>this</code>变量呢？</p>
+<p>从功能上看，<code>this</code>变量完全可以通过参数的方式把<code>this</code>所指向的值传入到函数中去。</p>
+<pre><code class="language-js"><span class="hljs-comment">// 使用this</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">speak</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Hello, I'm <span class="hljs-subst">${<span class="hljs-keyword">this</span>.name}</span>.`</span>);
+}
+<span class="hljs-keyword">let</span> me = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Lehua'</span>
+};
+speak.call(me); <span class="hljs-comment">// =&gt; Hello, I'm Lehua.</span>
+</code></pre>
+<pre><code class="language-js"><span class="hljs-comment">// 不使用this</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">speak</span>(<span class="hljs-params">context</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Hello, I'm <span class="hljs-subst">${context.name}</span>.`</span>);
+}
+<span class="hljs-keyword">let</span> me = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Lehua'</span>
+};
+speak(me); <span class="hljs-comment">// =&gt; Hello, I'm Lehua.</span>
+</code></pre>
+<p><code>this</code>变量提供了一个优雅和统一的方式，隐式地向函数作用域传入一个对象。（或者只是为了让Java程序员感到熟悉。）</p>
+<p><code>this</code>变量的指向依次按照如下的规则确定的：</p>
+<ol>
+<li>如果函数是通过<code>new</code>调用的，则<code>this</code>指向一个全新创建的空对象。</li>
+<li>如果函数是通过<code>call</code>、<code>apply</code>调用，或者函数进行了<code>bind</code>，则<code>this</code>指向的是显式传入的那个对象。</li>
+<li>如果函数是通过对象点方法调用的，则<code>this</code>指向点前面的对象。</li>
+<li>其他情况，<code>this</code>指向全局变量（严格模式下是<code>undefined</code>）。</li>
+</ol>
+<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">f</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// 运行时存在一个this变量</span>
+    <span class="hljs-comment">// 不同的调用方式this指向不同</span>
+}
+<span class="hljs-keyword">let</span> obj = {
+    <span class="hljs-attr">f</span>: f
+};
+<span class="hljs-keyword">let</span> newObj = {};
+
+<span class="hljs-comment">// 1.</span>
+<span class="hljs-keyword">new</span> f();
+<span class="hljs-keyword">new</span> obj.f();
+
+<span class="hljs-comment">// 2.</span>
+f.call(newObj);
+f.apply(newObj);
+f.bind(newObj)();
+obj.f.call(newObj);
+
+<span class="hljs-comment">// 3.</span>
+obj.f();
+
+<span class="hljs-comment">// 4.</span>
+f();
+setTimeout(obj.f, <span class="hljs-number">0</span>);
+</code></pre>
+<p>在ES6中，引入了箭头函数，箭头函数本身并不存在<code>this</code>，在里面访问<code>this</code>时是根据词法作用域规则，向外层作用域一层层查找获取。</p>
+<pre><code class="language-js"><span class="hljs-keyword">let</span> obj = {
+    <span class="hljs-attr">f</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-comment">// 根据词法作用域规则，不管f怎么被调用</span>
+        <span class="hljs-comment">// 这里的this始终指向全局变量</span>
+    }
+}
+
+obj.f.call({});
+obj.f();
+setTimeout(obj.f, <span class="hljs-number">0</span>);
+</code></pre>
+<h2>2. 传统的Class</h2>
+<p>面向Class是代码组织的一种方式：将数据和行为封装在一起。每个类就代表着这样一种封装的模版（蓝图），然后需要通过实例化某个类来得到该类的一个实现。</p>
+<p>面向Class的主要特点是继承和多态。继承指一个类B从另一个类A那里继承A中的所有内容，也就是拷贝一份A中的数据和行为到B中。多态指子类可以拥有父类的同名方法。</p>
+<p>下方代码展示了面向Class中继承的本质（即拷贝A的数据和方法到B中）：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">f1</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> f2();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">f2</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">A</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">f1</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">super</span>.f1();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">f2</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>;
+    };
+}
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        B b = <span class="hljs-keyword">new</span> B();
+        System.out.println(b.f1()); <span class="hljs-comment">// =&gt; 2</span>
+    }
+}
+</code></pre>
+<h2>3. JS中的<code>[[Prototype]]</code></h2>
+<p>在JS中没有Class，只有对象的概念，JS中是通过原型来模拟面向Class中的继承等功能，称作“原型继承”。</p>
+<p>JS中的原型机制大概是这样子的。JS中的每个对象，都隐含有一个<code>[[Prototype]]</code>，它会指向另外一个对象。这个<code>[[Prototype]]</code>是说，当访问某个对象的属性时，首先是从该对象本身上寻找，如果该属性不存在该对象本身，就去该对象的原型对象上找，如果还不存在，就再去该对象的原型对象的原型对象上找，直到找到或到达了原型链的顶端为止。</p>
+<p>所以作者提到了一个更加准确的词：“代理”。一个对象代理部分行为到另一个对象。</p>
+<pre><code class="language-js"><span class="hljs-comment">// 1.通过构造函数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">F1</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">this</span>.name = <span class="hljs-string">'obj1'</span>;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">F2</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">this</span>.f2 = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.name);
+    }
+}
+F2.prototype = <span class="hljs-keyword">new</span> F1();
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">F3</span>(<span class="hljs-params"></span>) </span>{}
+F3.prototype = <span class="hljs-keyword">new</span> F2();
+
+<span class="hljs-keyword">let</span> obj3 = <span class="hljs-keyword">new</span> F3();
+obj3.f2(); <span class="hljs-comment">// =&gt; obj1</span>
+
+<span class="hljs-comment">// 2.通过Object.create</span>
+<span class="hljs-keyword">let</span> obj1 = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'obj1'</span>
+}
+<span class="hljs-keyword">let</span> obj2 = <span class="hljs-built_in">Object</span>.create(obj1);
+obj2.f2 = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.name);
+};
+<span class="hljs-keyword">let</span> obj3 = <span class="hljs-built_in">Object</span>.create(obj2);
+
+obj3.f2(); <span class="hljs-comment">// =&gt; obj1</span>
+
+<span class="hljs-comment">// 3.通过Object.setPrototypeOf</span>
+<span class="hljs-keyword">let</span> obj1 = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'obj1'</span>
+}
+<span class="hljs-keyword">let</span> obj2 = {
+    <span class="hljs-attr">f2</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.name);
+    }
+}
+<span class="hljs-keyword">let</span> obj3 = {};
+
+<span class="hljs-built_in">Object</span>.setPrototypeOf(obj2, obj1);
+<span class="hljs-built_in">Object</span>.setPrototypeOf(obj3, obj2);
+obj3.f2(); <span class="hljs-comment">// =&gt; obj1</span>
+</code></pre>
+<h2>4. 用[[Prototype]]模拟Class</h2>
+<p>由于JS中并没有Class（抽象的蓝图），但是面向Class作为一种设计模式已经被广泛的使用了。为了模拟面向Class的编程方式，JS提出了构造函数、<code>new</code>、<code>instanceof</code>等概念。到了ES6，直接出现了<code>class</code>、<code>extends</code>等功能。然而，这些往面向Class靠的编程方式，底层依然是通过原型去模拟的。</p>
+<p>模拟面向Class编程的第一步是模拟Class，也就是JS中的“构造函数”。有意思的是JS中其实并不真的存在“构造函数”这种类型的函数，有的只是通过前面添加<code>new</code>关键字的调用函数的方式。所以更准确来说，JS通过提供“构造函数的调用方式”来模拟Class和实例化。</p>
+<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">C</span>(<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">this</span>.name = name;
+}
+C.prototype.speak = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Hello, <span class="hljs-subst">${<span class="hljs-keyword">this</span>.name}</span>.`</span>);
+}
+
+<span class="hljs-keyword">let</span> a = <span class="hljs-keyword">new</span> C(<span class="hljs-string">'JS'</span>);
+a.speak(); <span class="hljs-comment">// =&gt; Hello, JS.</span>
+</code></pre>
+<p>通过<code>new</code>的形式调用有两个效果，一个是会新生成一个对象，另一点是设置这个新对象的原型为<code>C</code>函数的<code>prototype</code>属性。这就带到了模拟的第二步，实现“继承”。上面的代码展示了新对象<code>a</code>“继承”了<code>speak</code>方法，继承的方式是通过设置<code>C</code>的<code>prototype</code>为需要继承的对象。从前面的继承定义看，这里的“继承”并不是真的继承，因为<code>a</code>并不是真正的拥有<code>speak</code>方法，拥有它的是<code>a</code>的原型对象。</p>
+<p>这样模拟下来的效果是设置了对象<code>a</code>的原型为<code>C.prototype</code>。这跟直接通过<code>Object.setPrototypeOf(a, C.prototype)</code>没有本质区别，唯一的区别是变得更绕了。</p>
+<h2>5. 不再模拟</h2>
+<p>指出了JS模拟面向Class编程的问题后，作者提出为何不直接拥抱JS中的原型机制，进行“面向代理”编程呢。这种编程方式作者给它取名叫OLOO（objects linked to other objects）。</p>
+<p>下面通过一个书中的稍微复杂点的例子，说明OLOO的好处。</p>
+<p>首先展示面向Class（面向对象）的方式：</p>
+<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Foo</span>(<span class="hljs-params">who</span>) </span>{
+    <span class="hljs-keyword">this</span>.me = who;
+}
+Foo.prototype.identify = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"I am "</span> + <span class="hljs-keyword">this</span>.me;
+};
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Bar</span>(<span class="hljs-params">who</span>) </span>{
+    Foo.call( <span class="hljs-keyword">this</span>, who );
+}
+Bar.prototype = <span class="hljs-built_in">Object</span>.create( Foo.prototype );
+
+Bar.prototype.speak = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    alert( <span class="hljs-string">"Hello, "</span> + <span class="hljs-keyword">this</span>.identify() + <span class="hljs-string">"."</span> );
+};
+
+<span class="hljs-keyword">var</span> b1 = <span class="hljs-keyword">new</span> Bar( <span class="hljs-string">"b1"</span> );
+<span class="hljs-keyword">var</span> b2 = <span class="hljs-keyword">new</span> Bar( <span class="hljs-string">"b2"</span> );
+
+b1.speak();
+b2.speak();
+</code></pre>
+<p>关系图：</p>
+<img src="../share/20171120/fig4.png">
+<p>关系图（简化版）：</p>
+<img src="../share/20171120/fig5.png">
+<p>下面是OLOO的方式：</p>
+<pre><code class="language-js"><span class="hljs-keyword">var</span> Foo = {
+    <span class="hljs-attr">init</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">who</span>) </span>{
+        <span class="hljs-keyword">this</span>.me = who;
+    },
+    <span class="hljs-attr">identify</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"I am "</span> + <span class="hljs-keyword">this</span>.me;
+    }
+};
+
+<span class="hljs-keyword">var</span> Bar = <span class="hljs-built_in">Object</span>.create( Foo );
+
+Bar.speak = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    alert( <span class="hljs-string">"Hello, "</span> + <span class="hljs-keyword">this</span>.identify() + <span class="hljs-string">"."</span> );
+};
+
+<span class="hljs-keyword">var</span> b1 = <span class="hljs-built_in">Object</span>.create( Bar );
+b1.init( <span class="hljs-string">"b1"</span> );
+<span class="hljs-keyword">var</span> b2 = <span class="hljs-built_in">Object</span>.create( Bar );
+b2.init( <span class="hljs-string">"b2"</span> );
+
+b1.speak();
+b2.speak();
+</code></pre>
+<p>关系图如下：</p>
+<img src="../share/20171120/fig6.png">
+
+</body>
+</html>

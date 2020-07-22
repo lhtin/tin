@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>依赖注入理解（2016-7-14）</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>依赖注入简介</h1>
+<h2>理论</h2>
+<p>简单来说，依赖注入是一种降低代码之间的耦合度，提高代码的灵活性的编程方法。事情是这样子的：</p>
+<p>我们编程都是从“Hello World”开始，但它不会永远停留在“Hello World”，它会变得越来越复杂。为了能够掌控程序的复杂，我们引进了模块化。模块化的目的是切分复杂，带来的问题是需要考虑代码之间的合作问题（不只是多人之间的代码，还有自己写的代码之间的合作问题）。合作意味着依赖，比如模块A依赖模块B提供的功能。具体到面向对象编程就是对象A里面，需要使用到对象B的实例。</p>
+<p>现在问题来了，对象B的实例化是在对象A里面实例化呢，还是先实例化，再将实例化后的实例当参数传给对象A呢？如果实例化的方式不变，当然在对象A里面实例化最好了，因为使用对象A的程序员不需要关注对象A还依赖了对象B。可是呢，需求总是在变化。如果哪天对象B改变了，它在实例化的时候要求添加一个参数，这下对象A就傻了。因为需要将对象B实例化的代码做更改，这相当于A限制了B的改变（不能只修改B，还要考虑到A）。</p>
+<p>那就选择将对象B的实例当参数传给对象A吧（解决问题的一种方法），这样对象A就不需要知道对象B是如何实例化的了（<strong>题外话，对象B依然需要保证提供的服务方式不变或者说暴露的接口不变</strong>）。这种将依赖的引入从使用者的代码中分离出来，交由框架管理的技术叫做<strong>控制反转</strong>（Inversion of Control）。OK，这里有两种方式将对象B的实例传给对象A。一种是对象A先声明依赖了哪些对象，框架根据声明去实例化这些对象并传给A。另外一种是对象A在需要的时候自己去问框架，框架返回A所依赖的对象B的实例。</p>
+<p>这两种方式都是<strong>把对象的实例化的问题交由一个依赖管理框架</strong>。第一种方式叫<strong>依赖注入</strong>（Dependency Injection），第二种方式叫<strong>依赖查找</strong>（Dependency Lookup）。这两者的区别在于框架把依赖注入给对象，还是对象主动查找需要的依赖。</p>
+<p>不管用没用控制反转，代码需要做的事情是一样都不少，控制反转只是将这种实例化的工作交给了代码而不是开发者。因为交给了代码来做，与代码的交互只能变的固定了（比如声明依赖的方式）。<strong>有了控制反转的好处是对象B的修改升级只需考虑对象B和依赖框架</strong>。</p>
+<h3>参考文章</h3>
+<ol>
+<li>依赖注入（<a href="https://github.com/android-cn/blog/tree/master/java/dependency-injection">https://github.com/android-cn/blog/tree/master/java/dependency-injection</a>）</li>
+<li>控制反转（<a href="https://zh.wikipedia.org/wiki/%E6%8E%A7%E5%88%B6%E5%8F%8D%E8%BD%AC">https://zh.wikipedia.org/wiki/控制反转</a>）</li>
+</ol>
+<h2>ES5实现一个依赖注入小框架</h2>
+<p>之前一篇文章从原理上介绍了依赖注入这个概念（文章名称：依赖注入简介）。为了更好的理解，本文通过ES5的代码实现一个依赖注入小框架，它叫做<code>DI</code>，它提供了<code>register</code>方法来注册服务，<code>inject</code>方法来注入服务，<code>lookup</code>方法来查找服务。先从这个小框架的使用方式开始：</p>
+<pre><code class="language-js">
+<span class="hljs-comment">// 定义了一个常值服务</span>
+<span class="hljs-keyword">var</span> con = <span class="hljs-number">0</span>;
+
+<span class="hljs-comment">// 定义了一个函数服务</span>
+<span class="hljs-keyword">var</span> fun = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">n</span>) </span>{
+    <span class="hljs-comment">// 查找con服务</span>
+    <span class="hljs-keyword">var</span> con = DI.lookup(<span class="hljs-string">'con'</span>);
+
+    <span class="hljs-keyword">return</span> con;
+}
+
+<span class="hljs-comment">// 定义了一个类（对象）服务</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">A</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// 注入con和fun服务给A</span>
+    DI.inject(<span class="hljs-keyword">this</span>, [
+        <span class="hljs-string">'c: con'</span>,
+        <span class="hljs-string">'f: fun'</span>
+    ]);
+
+    <span class="hljs-keyword">this</span>.sum = <span class="hljs-keyword">this</span>.f(<span class="hljs-keyword">this</span>.c);
+}
+A.prototype = {
+    <span class="hljs-attr">getSum</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">this</span>.sum += <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.sum;
+    }
+}
+
+<span class="hljs-comment">// 注册到框架中</span>
+DI.register(<span class="hljs-string">'con'</span>, {<span class="hljs-attr">type</span>: DI.CONSTANT, <span class="hljs-attr">value</span>: con});
+DI.register(<span class="hljs-string">'fun'</span>, {<span class="hljs-attr">type</span>: DI.FUNCTION, <span class="hljs-attr">value</span>: fun});
+DI.register(<span class="hljs-string">'A'</span>, {<span class="hljs-attr">type</span>: DI.CLASS, <span class="hljs-attr">value</span>: A});
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">B</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// 注入A的一个实例给B</span>
+    DI.inject(<span class="hljs-keyword">this</span>, [
+        <span class="hljs-string">'a: A'</span>
+    ]);
+
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'B: '</span> + <span class="hljs-keyword">this</span>.a.getSum());
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">C</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// 注入A的一个实例给C</span>
+    DI.inject(<span class="hljs-keyword">this</span>, [
+        <span class="hljs-string">'a: A'</span>
+    ]);
+
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'C: '</span> + <span class="hljs-keyword">this</span>.a.getSum());
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">D</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// 注入A的一个实例给D，A类前面一个加号表示单独拥有一个A的实例</span>
+    DI.inject(<span class="hljs-keyword">this</span>, [
+        <span class="hljs-string">'a: +A'</span>
+    ]);
+
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'D: '</span> + <span class="hljs-keyword">this</span>.a.getSum());
+}
+
+<span class="hljs-keyword">var</span> b = <span class="hljs-keyword">new</span> B(),
+    c = <span class="hljs-keyword">new</span> C(),
+    d = <span class="hljs-keyword">new</span> D();
+</code></pre>
+<p>输出：</p>
+<pre><code class="language-js">B: <span class="hljs-number">1</span>
+C: <span class="hljs-number">2</span>
+D: <span class="hljs-number">1</span>
+</code></pre>
+<p>先介绍下语法：</p>
+<ul>
+<li><code>c: con</code>表示依赖于<code>con</code>这个服务，并命名为<code>c</code></li>
+<li><code>a: +A</code>表示依赖并独享<code>A</code>这个服务的实例，并命名为<code>a</code></li>
+</ul>
+<p>从上面的代码可以发现D是独享一个A的实例（输出1），而B和C共享了一个实例（先输出1，然后累加输出2）。上面的示例代码已经演示完了这个<code>DI</code>小框架的所有用法了，那么它是如何实现这个功能的呢，且看下面的代码。</p>
+<p>小框架<code>DI</code>的源码：</p>
+<pre><code class="language-js">
+<span class="hljs-keyword">var</span> DI = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+
+    <span class="hljs-comment">// 定义服务类型</span>
+    <span class="hljs-keyword">var</span> CLASS = <span class="hljs-number">1</span>, <span class="hljs-comment">// 类（对象）</span>
+        CONSTANT = <span class="hljs-number">2</span>, <span class="hljs-comment">// 常值</span>
+        FUNCTION = <span class="hljs-number">3</span>; <span class="hljs-comment">// 函数</span>
+
+    <span class="hljs-comment">// 存放注册的服务们</span>
+    <span class="hljs-keyword">var</span> services = {};
+
+    <span class="hljs-comment">// 存放共享的实例</span>
+    <span class="hljs-keyword">var</span> instances = {};
+
+    <span class="hljs-keyword">var</span> getNew = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+        <span class="hljs-keyword">var</span> service = services[name];
+        <span class="hljs-keyword">switch</span> (service.type) {
+            <span class="hljs-keyword">case</span> CLASS:
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> service.value();
+            <span class="hljs-keyword">case</span> CONSTANT:
+                <span class="hljs-keyword">return</span> service.value;
+            <span class="hljs-keyword">case</span> FUNCTION:
+                <span class="hljs-keyword">return</span> service.value;
+        }
+    };
+
+    <span class="hljs-keyword">var</span> getOne = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+        <span class="hljs-keyword">if</span> (name[<span class="hljs-number">0</span>] === <span class="hljs-string">'+'</span>) {
+
+            <span class="hljs-comment">// 单独享用一个实例，直接方法</span>
+            <span class="hljs-keyword">return</span> getNew(name.slice(<span class="hljs-number">1</span>));
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> instances[name] === <span class="hljs-string">'undefined'</span>) {
+
+            <span class="hljs-comment">// 把共享的实例存起来</span>
+            instances[name] = {
+                <span class="hljs-attr">value</span>: getNew(name)
+            };
+            <span class="hljs-keyword">return</span> instances[name].value;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> instances[name].value;
+        }
+    }
+
+    <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">CLASS</span>: CLASS,
+        <span class="hljs-attr">CONSTANT</span>: CONSTANT,
+        <span class="hljs-attr">FUNCTION</span>: FUNCTION,
+
+        <span class="hljs-comment">// 向依赖框架注册一个服务（可被依赖）</span>
+        register: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, service</span>) </span>{
+            services[name] = service;
+        },
+
+        <span class="hljs-comment">// 注入依赖</span>
+        inject: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">self, names</span>) </span>{
+            names.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+                <span class="hljs-keyword">var</span> temp = name.split(<span class="hljs-string">':'</span>);
+                self[temp[<span class="hljs-number">0</span>].trim()] = getOne(temp[<span class="hljs-number">1</span>].trim());
+            })
+        },
+
+        <span class="hljs-comment">// 查找依赖</span>
+        lookup: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+            <span class="hljs-keyword">return</span> getOne(name);
+        }
+    }
+
+})();
+</code></pre>
+<p>是不是觉得很简单。其实就是用一个对象来管理这些依赖，如果没有实例，它就去生成一个，如果想独享一个实例，它就去实例化一个新的实例。</p>
+
+
+</body>
+</html>

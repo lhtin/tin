@@ -1,0 +1,109 @@
+* {
+    line-height: 180%;
+}
+
+html {
+    font-family: Optima, "STHeiti", sans-serif;
+    font-size: 16px;
+    color: black;
+}
+
+body {
+    margin: 0 auto;
+    padding: 3% 20px;
+    max-width: 600px;
+}
+
+ol > li,
+ul > li {
+    margin: 10px 0;
+}
+
+#disqus_thread {
+    margin-top: 50px;
+}
+
+/* contents */
+.desc {
+    max-width: 400px;
+    margin: 0 auto;
+    font-size: 14px;
+    color: gray;
+}
+.contents {
+    margin: 0 auto;
+    max-width: 600px;
+}
+
+.contents .logo {
+    text-align: center;
+}
+
+ul.contents {
+    padding: 20px 0;
+    list-style: none;
+}
+ul.contents li a {
+    display: block;
+    margin: 10px 0;
+    padding: 5px;
+    text-align: center;
+    word-break: break-all;
+    cursor: pointer;
+    color: black;
+    background-color: white;
+    transition: background-color 0.3s ease;
+}
+ul.contents li a:hover {
+    color: white;
+    background-color: gray;
+}
+
+/* detail */
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    border-bottom: 1px solid gray;
+}
+
+code {
+    font-family: "PT Mono", Monaco, consolas, 'Courier New', monospace !important;
+    color: crimson;
+    font-size: 0.875em;
+    display: inline-block;
+    padding: 0 3px;
+    margin: 0 3px;
+    background: #eee;
+}
+
+pre {
+    border: 1px solid #ddd;
+    padding: 15px;
+    font-size: 12px;
+    overflow: auto;
+    background: #eee;
+}
+
+pre code {
+    color: black;
+    line-height: 160%;
+}
+
+img {
+    max-width: 100%;
+}
+
+blockquote {
+    margin: 0;
+    border-left: 5px solid crimson;
+    padding: 5px 5px 5px 20px;
+    font-size: 14px;
+    background-color: aliceblue;
+}
+
+img:hover {
+    cursor: zoom-in;
+}

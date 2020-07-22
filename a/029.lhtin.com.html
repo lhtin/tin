@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lhtin.com建站记录</title>
+  <link rel="icon" type="image/png" href="../think/assets/ant.png">
+  <link href="../styles.css" rel="stylesheet">
+  <link href="../vs.css" rel="stylesheet">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-1');
+  </script>
+  <script async src="../index.js"></script>
+</head>
+<body>
+<h1>lhtin.com建站记录</h1>
+<h2>目录</h2>
+<ul>
+<li>lhtin.com 域名及DNS配置</li>
+<li>Vultr VPS 购买和使用</li>
+<li>Shadowsocks 配置</li>
+<li>nginx 配置和 https</li>
+</ul>
+<h2>域名和DNS配置</h2>
+<p>lhtin.com域名是在godaddy.com上购买的，两年100多。在我拥有了VPS之后（也就是有了IP），需要在godaddy上配置DNS的A记录指向到该IP。</p>
+<h2>VPS</h2>
+<p>我实在Vultr上购买的VPS（虚拟专用服务器），系统是Ubuntu 18.04 x64。购买后可以看到IP、用户名和密码，然后就可以通过ssh登录到这台服务器，进而控制一切。</p>
+<h2>Shadowsocks</h2>
+<p>Shadowsocks用于科学上网。首先是在VPS上安装它的服务器，重点设置密码。然后我在Mac和iOS上下载了它的客户端（iOS上下载的是SuperWingy）。文档<a href="https://github.com/shadowsocks/shadowsocks/wiki">这里</a>。</p>
+<h2>nginx和https</h2>
+<p>首先根据nginx.org上的<a href="http://nginx.org/en/linux_packages.html">安装说明</a>，将nginx的apt的sources.list设置好，然后通过apt-get安装即可。弄好后，根据<a href="https://www.vultr.com/docs/setup-lets-encrypt-with-nginx-on-ubuntu-16-04">这篇文章</a>使用Let's Encrypt证书配置https，使用Certbot生成证书非常方便，连nginx的config都自动配置好了。</p>
+<h2>蛋疼的问题</h2>
+<p>本来打算用来开发小程序用的，但是小程序的域名必须要备过案才行，而国外的vps没法备案。这个以后再说吧，没办法就再换到国内的服务器。</p>
+
+
+</body>
+</html>

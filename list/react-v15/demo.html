@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>demo</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="./react.min.js"></script>
+    <script src="./react-dom.min.js"></script>
+    <script>
+      class Item extends React.Component {
+        render () {
+          return (
+            /* <p style={{color: this.props.color}}>{this.props.children}</p> */
+            React.createElement(
+              'p',
+              {
+                style: {
+                  color: this.props.color
+                }
+              },
+              this.props.children
+            )
+          )
+        }
+      }
+      const List = (props) => {
+        return (
+          /* <div> ... </div> */
+          React.createElement(
+            'div',
+            null,
+            props.list.map((item) => (
+              /* <Item key={item.key} color={item.color}>{item.content}</Item> */
+              React.createElement(
+                Item,
+                {
+                  key: item.key,
+                  color: item.color
+                },
+                item.content
+              )
+            ))
+          )
+        )
+      }
+      class App extends React.Component {
+        constructor (props) {
+          super(props)
+          this.state = {
+            msgList: [{
+              key: 1,
+              color: '#f44336', // red
+              content: 'in constructor'
+            }]
+          }
+        }
+        componentDidMount () {
+          setTimeout(() => {
+            this.setState({
+              msgList: [
+                ...this.state.msgList,
+                {
+                  key: 2,
+                  color: '#4caf50', // green
+                  content: 'in setTimeout'
+                }
+              ]
+            })
+          }, 3000)
+        }
+        render () {
+          return (
+            /* <List list={this.state.msgList} /> */
+            React.createElement(
+              List,
+              {
+                list: this.state.msgList
+              },
+              null
+            )
+          )
+        }
+      }
+      ReactDOM.render(
+        /* <App /> */
+        React.createElement(
+          App,
+          null,
+          null
+        ),
+        document.getElementById('app')
+      )
+    </script>
+  </body>
+</html>

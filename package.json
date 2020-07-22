@@ -1,0 +1,23 @@
+{
+  "name": "lhtin.github.io",
+  "description": "tin's blog",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "gulp build && gulp watch",
+    "server": "http-server ./ -p  8888 -o",
+    "build": "gulp build"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-rimraf": "^0.2.2",
+    "highlight.js": "^9.13.0",
+    "http-server": "^0.11.1",
+    "markdown-it": "^8.4.2",
+    "slash": "^2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lhtin/lhtin.github.io.git"
+  },
+  "license": "ISC"
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>财报计算工具</title>
+    <style>
+        * {
+            font-family: Optima, "STHeiti", sans-serif;
+            line-height: 150%;
+        }
+
+        body {
+            margin: 0;
+            padding: 8px;
+            display: flex;
+        }
+
+        button {
+            margin: 16px;
+            font-size: 18px;
+            width: 100px;
+        }
+
+        #input {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            height: 500px;
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        pre {
+            margin: 0;
+        }
+
+        .flex1 {
+            padding: 16px;
+            flex: 1;
+        }
+
+        .flex2 {
+            padding: 16px;
+            flex: 2
+        }
+
+        #box {
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="flex1">
+        <textarea id="input" placeholder="输入数据"></textarea>
+        <button id="add-btn">新增</button>
+        <button id="calc-btn">计算</button>
+        <button id="clear-btn">清除</button>
+    </div>
+    <div class="flex2">
+        <pre id="box"></pre>
+    </div>
+    <script src="./$.js"></script>
+    <script>
+        let input = document.getElementById('input')
+        input.value = localStorage.getItem('placeholder') || placeholder
+        let box = document.getElementById('box')
+        let calc_btn = document.getElementById('calc-btn')
+        let clear_btn = document.getElementById('clear-btn')
+        let add_btn = document.getElementById('add-btn')
+        clear_btn.addEventListener('click', () => {
+            localStorage.setItem('placeholder', placeholder)
+            input.value = placeholder
+            box.innerHTML = ''
+        })
+        calc_btn.addEventListener('click', () => {
+            localStorage.setItem('placeholder', input.value)
+            box.innerHTML = format_input(input.value)
+                .map((data) => format_output($(data)))
+                .join('\n------\n')
+        })
+        add_btn.addEventListener('click', () => {
+            input.value =  `${input.value}\n------\n${placeholder}`
+        })
+    </script>
+</body>
+
+</html>

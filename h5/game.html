@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>五子棋</title>
+    <style>
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 640px;
+            height: 640px;
+        }
+
+        .panel {
+            text-align: center;
+        }
+
+        .panel button {
+            margin: 0 20px;
+            padding: 0 20px;
+            height: 40px;
+            line-height: 40px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="panel">
+    <button id="prev">悔棋</button>
+    <button id="next">撤销</button>
+    <button id="people">人人大战</button>
+    <button id="computer">人机大战</button>
+    <p>注：1. 比赛开始后黑子先下；2. 在人机大战中，机器使用白子。</p>
+</div>
+<div id="box"></div>
+<script>
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const box = document.getElementById('box');
+    const people = document.getElementById('people');
+    const computer = document.getElementById('computer');
+
+    const BLACK = 0; // 表示该位置为黑子
+    const WHITE = 1; // 表示该位置为白字
+    const EMPTY = undefined; // 表示该位置为空
+
+    // UI相关
+    function makeUI(board, cb) {
+        let canvas = document.createElement('canvas');
+        box.innerHTML = '';
+        box.appendChild(canvas);
+        let len = 640;
+        canvas.width = len;
+        canvas.height = len;
+        let padding = 10;
+        let a = board.getLen();
+        let r = (len - 2 * padding) / a / 2; // 棋子半径
+        let from = padding + r, to = len - padding - r;
+        let ctx = canvas.getContext('2d');
+
+        // 添加棋子到棋盘上
+        function add(step) {
+            let x = step.x,
+                y = step.y,
+                flag = step.flag;
+            if (flag === WHITE) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.fillStyle = 'white';
+                ctx.arc(from + x * r * 2, from + y * r * 2, r - 2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                ctx.closePath();
+            } else if (flag === BLACK) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.fillStyle = 'black';
+                ctx.arc(from + x * r * 2, from + y * r * 2, r - 2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
+
+        let api = {
+            // 根据board状况刷新棋盘
+            refresh: function () {
+                ctx.clearRect(0, 0, len, len);
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < a; i += 1) {
+                    let at = padding + r + i * r * 2;
+                    ctx.beginPath();
+                    ctx.moveTo(at, from);
+                    ctx.lineTo(at, to);
+                    ctx.stroke();
+                    ctx.closePath();
+                    ctx.beginPath();
+                    ctx.moveTo(from, at);
+                    ctx.lineTo(to, at);
+                    ctx.stroke();
+                    ctx.closePath();
+                }
+                let steps = board.getSteps();
+                for (let i = 0, len = steps.length; i < len; i += 1) {
+                    let step = steps[i];
+                    add(step);
+                }
+            },
+            lock: function (result) {
+                ctx.fillStyle = 'rgba(255,255,255,.8)';
+                ctx.beginPath();
+                ctx.fillRect(0, 0, len, len);
+                ctx.closePath();
+                ctx.fillStyle = 'black';
+                ctx.font = '50px STHeiti';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                if (result === BLACK) {
+                    ctx.fillText('黑子赢', len / 2, len / 2);
+                } else {
+                    ctx.fillText('白子赢', len / 2, len / 2);
+                }
+            }
+        };
+        api.refresh();
+
+        canvas.addEventListener('click', function (e) {
+            let rect = canvas.getBoundingClientRect();
+            let x = e.clientX - rect.left - padding,
+                y = e.clientY - rect.top - padding;
+            cb && cb(Math.floor(x / (2 * r)), Math.floor(y / (2 * r)))
+        });
+
+        return api;
+    }
+
+    // 存储所有的步数及悔棋和撤销功能
+    function makeSteps() {
+        let steps = [];
+        let len = 0;
+        let at = -1;
+
+        return {
+            // 获取步长
+            getLen: function () {
+                return at;
+            },
+            // 获取有效步数
+            get: function () {
+                if (at > -1) {
+                    return steps.slice(0, at + 1);
+                }
+                return [];
+            },
+            add: function (step) {
+                at += 1;
+                steps[at] = step;
+                len = at;
+            },
+            canPrev: function () {
+                return at > -1;
+            },
+            canNext: function () {
+                return at < len;
+            },
+            prev: function () {
+                if (at > -1) {
+                    let step = steps[at];
+                    at -= 1;
+                    return step;
+                }
+            },
+            next: function () {
+                if (at < len) {
+                    at += 1;
+                    return steps[at];
+                }
+            }
+        }
+    }
+
+    // 棋盘对象
+    function makeBoard(a) {
+        let data = [];
+        let steps = makeSteps();
+        let result = null;
+
+        // 二维坐标转一维坐标
+        function at(x, y) {
+            return x + a * y;
+        }
+
+        // 计算当前位置的最大分数
+        function calc(step) {
+            // 1
+            let r1 = {
+                c: 1,
+                t: 0
+            };
+            for (let i = step.x - 1; i >= 0; i -= 1) {
+                let flag = data[at(i, step.y)];
+                if (flag === step.flag) {
+                    r1.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r1.t += 1;
+                    }
+                    break;
+                }
+            }
+            for (let i = step.x + 1; i < a; i += 1) {
+                let flag = data[at(i, step.y)];
+                if (flag === step.flag) {
+                    r1.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r1.t += 1;
+                    }
+                    break;
+                }
+            }
+
+            // 2
+            let r2 = {
+                c: 1,
+                t: 0
+            };
+            for (let i = step.y - 1; i >= 0; i -= 1) {
+                let flag = data[at(step.x, i)];
+                if (flag === step.flag) {
+                    r2.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r2.t += 1;
+                    }
+                    break;
+                }
+            }
+            for (let i = step.y + 1; i < a; i += 1) {
+                let flag = data[at(step.x, i)];
+                if (flag === step.flag) {
+                    r2.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r2.t += 1;
+                    }
+                    break;
+                }
+            }
+
+            // 3
+            let r3 = {
+                c: 1,
+                t: 0
+            };
+            for (let i = step.x - 1, j = step.y - 1;
+                 i >= 0 && j >= 0;
+                 i -= 1, j -= 1) {
+                let flag = data[at(i, j)];
+                if (flag === step.flag) {
+                    r3.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r3.t += 1;
+                    }
+                    break;
+                }
+            }
+            for (let i = step.x + 1, j = step.y + 1;
+                 i < a && j < a;
+                 i += 1, j += 1) {
+                let flag = data[at(i, j)];
+                if (flag === step.flag) {
+                    r3.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r3.t += 1;
+                    }
+                    break;
+                }
+            }
+
+            // 4
+            let r4 = {
+                c: 1,
+                t: 0
+            };
+            for (let i = step.x + 1, j = step.y - 1;
+                 i < a && j >= 0;
+                 i += 1, j -= 1) {
+                let flag = data[at(i, j)];
+                if (flag === step.flag) {
+                    r4.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r4.t += 1;
+                    }
+                    break;
+                }
+            }
+            for (let i = step.x - 1, j = step.y + 1;
+                 i >= 0 && j < a;
+                 i -= 1, j += 1) {
+                let flag = data[at(i, j)];
+                if (flag === step.flag) {
+                    r4.c += 1;
+                } else {
+                    if (flag === EMPTY) {
+                        r4.t += 1;
+                    }
+                    break;
+                }
+            }
+
+            let rs = [r1, r2, r3, r4];
+            let five = rs.reduce(function (sum, r) {
+                return sum + (r.c === 5 ? 1 : 0);
+            }, 0);
+            let live4 = rs.reduce(function (sum, r) {
+                return sum + ((r.c === 4 && r.t === 2) ? 1 : 0);
+            }, 0);
+            let dead4 = rs.reduce(function (sum, r) {
+                return sum + ((r.c === 4 && r.t === 1) ? 1 : 0);
+            }, 0);
+            let live3 = rs.reduce(function (sum, r) {
+                return sum + ((r.c === 3 && r.t === 2) ? 1 : 0);
+            }, 0);
+            let dead3 = rs.reduce(function (sum, r) {
+                return sum + ((r.c === 3 && r.t === 1) ? 1 : 0);
+            }, 0);
+            let live2 = rs.reduce(function (sum, r) {
+                return sum + ((r.c === 2 && r.t === 2) ? 1 : 0);
+            }, 0);
+            let dead2 = rs.reduce(function (sum, r) {
+                return sum + ((r.c === 2 && r.t === 1) ? 1 : 0);
+            }, 0);
+
+            if (five >= 1) {
+                return 100;
+            } else if (live4 >= 1 || dead4 >= 2 || (dead4 >= 1 && live3 >= 1)) {
+                return 90;
+            } else if (live3 >= 2) {
+                return 80;
+            } else if (live3 >= 1 && dead3 >= 1) {
+                return 70;
+            } else if (dead4 >= 1) {
+                return 60;
+            } else if (live3 >= 1) {
+                return 50;
+            } else if (live2 >= 2) {
+                return 40;
+            } else if (dead3 >= 1) {
+                return 30;
+            } else if (live2 >= 1) {
+                return 20;
+            } else if (dead2 >= 1) {
+                return 10;
+            } else {
+                return 0;
+            }
+        }
+
+        return {
+            getSteps: function () {
+                return steps.get();
+            },
+            getLen: function () {
+                return a;
+            },
+            hasResult: function () {
+                return !!result;
+            },
+            getResult: function () {
+                return result;
+            },
+            findBest: function () {
+                let res = null;
+                for (let i = 0; i < a; i += 1) {
+                    for (let j = 0; j < a; j += 1) {
+                        if (data[at(i, j)] === EMPTY) {
+                            let score = Math.max(calc({
+                                x: i,
+                                y: j,
+                                flag: BLACK
+                            }), calc({
+                                x: i,
+                                y: j,
+                                flag: WHITE
+                            }));
+
+                            if (!res || res.score < score) {
+                                res = {
+                                    x: i,
+                                    y: j,
+                                    score: score
+                                }
+                            }
+                        }
+                    }
+                }
+                return res;
+            },
+            check: function (step) {
+                let n = calc(step);
+                if (n >= 100) {
+                    result = step;
+                }
+            },
+            add: function (step) {
+                steps.add(step);
+                data[at(step.x, step.y)] = step.flag;
+                this.check(step);
+            },
+            canPrev: function () {
+                return steps.canPrev();
+            },
+            canNext: function () {
+                return steps.canNext();
+            },
+            prev: function () {
+                let step = steps.prev();
+                if (step) {
+                    data[at(step.x, step.y)] = EMPTY;
+                    result = null;
+                    return true;
+                }
+            },
+            next: function () {
+                let step = steps.next();
+                if (step) {
+                    data[at(step.x, step.y)] = step.flag;
+                    this.check(step);
+                    return true;
+                }
+            },
+            get: function (x, y) {
+                return data[at(x, y)];
+            },
+            isEmpty: function (x, y) {
+                return data[at(x, y)] === EMPTY;
+            }
+        }
+    }
+
+    function run(computer) {
+        // computer 为 true 表示人机下棋
+
+        const A = 15; // 15路规格
+        let flag = BLACK;
+        let nextFlag = function () {
+            flag = (flag === BLACK) ? WHITE : BLACK;
+        };
+        let board = makeBoard(A);
+        let ui = makeUI(board, function (x, y) {
+            // 用户点击了棋盘的回调
+            if (!board.isEmpty(x, y)
+                || board.hasResult()
+                || (computer && flag !== BLACK)) {
+                return;
+            }
+
+            let step = {
+                x: x,
+                y: y,
+                flag: flag
+            };
+            board.add(step);
+            ui.refresh();
+            nextFlag();
+            if (computer && !board.hasResult()) {
+                let p = board.findBest();
+                if (p) {
+                    board.add({
+                        x: p.x,
+                        y: p.y,
+                        flag: flag
+                    });
+                    ui.refresh();
+                    nextFlag();
+                }
+            }
+            if (board.hasResult()) {
+                let result = board.getResult();
+                ui.lock(result.flag);
+            }
+        });
+
+        prev.addEventListener('click', function () {
+            if (board.canPrev()) {
+                board.prev();
+                ui.refresh();
+                nextFlag();
+            }
+        });
+        next.addEventListener('click', function () {
+            if (board.canNext()) {
+                board.next();
+                ui.refresh();
+                nextFlag();
+                let result = board.getResult();
+                if (result) {
+                    ui.lock(result.flag);
+                }
+            }
+        });
+    }
+
+    computer.addEventListener('click', function () {
+        run(true);
+    });
+    people.addEventListener('click', function () {
+        run(false);
+    });
+</script>
+
+<script>
+    // test
+    /*
+     const b = makeBoard(15);
+     b.add({x: 0, y: 0, flag: BLACK});
+     b.add({x: 0, y: 1, flag: WHITE});
+     b.add({x: 1, y: 1, flag: BLACK});
+     b.add({x: 1, y: 2, flag: WHITE});
+     b.add({x: 2, y: 2, flag: BLACK});
+     b.add({x: 2, y: 4, flag: WHITE});
+     b.add({x: 3, y: 3, flag: BLACK});
+     b.add({x: 6, y: 7, flag: WHITE});
+     b.add({x: 4, y: 4, flag: BLACK});
+     if (!b.hasResult()) {
+     console.log('测试失败：没检测到成功');
+     } else if (b.getResult().flag !== BLACK) {
+     console.log('测试失败：成功赢家不对');
+     }
+     */
+</script>
+</body>
+</html>
