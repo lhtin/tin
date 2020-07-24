@@ -115,8 +115,8 @@ Jump    -> ";" jump
 
 dest    -> "A" | "D" | "M" | "AD" | "AM" | "MD" | "AMD"
 comp    -> "0" | "1" | "-1" | "D" | "A" | "!D" | "!A" | "-D" | "-A"
-        | "D+1" | "A+1" | "D-1" | "A-1" | "D+A" | "D-A" | "A-D" | "D&A" | "D|A" 
-        | "M" | "!M" | "-M" | "M+1" | "M-1" | "D+M" | "D-M" | "M-D" | "D&M" | "D|M"
+        |  "D+1" | "A+1" | "D-1" | "A-1" | "D+A" | "D-A" | "A-D" | "D&A" | "D|A" 
+        |  "M" | "!M" | "-M" | "M+1" | "M-1" | "D+M" | "D-M" | "M-D" | "D&M" | "D|M"
 jump    -> "JGT" | "JEG" | "JGE" | "JLT" | "JNE" | "JLE" | "JMP"
 num     -> [0-9]+
 symbol  -> [a-zA-Z_.$:][a-zA-Z_.$:0-9]+
