@@ -6,3 +6,4 @@ node_modules/
 public/
 .deploy*/
 gitee_open_api.json
+.idea
