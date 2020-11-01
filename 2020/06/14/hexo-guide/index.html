@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2cdbc7958f6df4fec3751794de6e9c63";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-2');
+  </script>
+
+
+
+  
+  <title>本站建造过程记录 | 01的世界</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本文详细记录了使用Hexo创建静态博客的过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="本站建造过程记录">
+<meta property="og:url" content="https://tintin.dev/2020/06/14/hexo-guide/index.html">
+<meta property="og:site_name" content="01的世界">
+<meta property="og:description" content="本文详细记录了使用Hexo创建静态博客的过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-01T09:07:19.044Z">
+<meta property="article:author" content="tintin">
+<meta property="article:tag" content="guide">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" type="image/x-icon" href="/images/logo.jpg">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <span id="logo">01的世界</span>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <span id="subtitle">计算机的世界没有秘密。</span>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://tintin.dev"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-hexo-guide" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title article-title-tin" itemprop="headline name">
+      本站建造过程记录
+    </h1>
+  
+  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2020-06-13T16:00:00.000Z" itemprop="datePublished">2020-06-14</time></p>
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本文记录了使用Hexo创建静态博客的过程。我的需求是为了学习的内容找一个地方系统的记录下来，并且可以很方便的查看，但是又不想自己去购买服务器。另外写作的语言要求为Markdown。我首先想到的是使用Gitee Pages服务，免费且在国内访问速度还不错。下面就来一一介绍这整个的过程。</p>
+<h2 id="使用Gitee-Pages服务"><a href="#使用Gitee-Pages服务" class="headerlink" title="使用Gitee Pages服务"></a>使用Gitee Pages服务</h2><p>在Gitee上创建一个账号，然后在创建一个名称跟账号同名的仓库。同名的作用是为了在访问时不需要指定仓库名称。比如说我的账户名是<a href="https://gitee.com/lhtin" target="_blank" rel="noopener">lhtin</a>，仓库名也为<a href="https://gitee.com/lhtin/lhtin" target="_blank" rel="noopener">lhtin</a>，这样就可以直接通过 <a href="https://lhtin.gitee.io" target="_blank" rel="noopener">https://lhtin.gitee.io</a> 访问，而不需要加上仓库的名称作为访问的路径（ <a href="https://lhtin.gitee.io/lhtin" target="_blank" rel="noopener">https://lhtin.gitee.io/lhtin</a> ）。</p>
+<p>创建了仓库之后，就可以对仓库启动Pages服务了，具体设置方式请直接参考<a href="https://gitee.com/help/articles/4136" target="_blank" rel="noopener">官方指南</a>。这样静态服务器就有了。</p>
+<h2 id="使用Hexo博客框架"><a href="#使用Hexo博客框架" class="headerlink" title="使用Hexo博客框架"></a>使用Hexo博客框架</h2><p>为了尽可能将时间花在写博客上面，我直接选择使用Hexo博客框架。这个框架非常灵活，除了基本的将Markdown编译为HTML能力之外，还提供了集中组织文章的方式。比如根据时间进行归档，根据标签和分类进行文章统计和检索。另外你也可以定义很多新的玩法，扩展性很好。下面介绍我的使用过程。</p>
+<h3 id="初始化博客项目"><a href="#初始化博客项目" class="headerlink" title="初始化博客项目"></a>初始化博客项目</h3><p>首先使用npm安装Hexo命令行工具，安装完之后初始化一个空的项目：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br><span class="line"></span><br><span class="line">hexo init &lt;name&gt;</span><br><span class="line"></span><br><span class="line">cd &lt;name&gt;</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>执行完了之后，项目默认使用landscape主题。初始化的项目中有以下几个脚本命名可以使用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">npm run server // 启动本地server</span><br><span class="line">npm run build // 将项目打包成静态文件，存放在public目录</span><br><span class="line">npm run deploy // 将public中的内容上传到指定的git仓库分支，需要在_config.yml中配置仓库信息，后面会介绍如何配置</span><br><span class="line"></span><br><span class="line">hexo new post hexo-guide // 根据scaffolds中的post模版生成文章的基本结构，会自动设置title和日期，生成的文件会存放在source/_posts中</span><br></pre></td></tr></table></figure>
+
+<p>更多指南请前往<a href="https://hexo.io/zh-cn/docs" target="_blank" rel="noopener">Hexo官方文档</a>。</p>
+<h3 id="根据需要修改配置"><a href="#根据需要修改配置" class="headerlink" title="根据需要修改配置"></a>根据需要修改配置</h3><p>在初始化完了项目之后，我做了一些修改，以满足我的需求。首先定义网站的相关信息（更多配置说明请参见<a href="https://hexo.io/zh-cn/docs/configuration" target="_blank" rel="noopener">官方文档-配置</a>）：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 项目根目录下的_config.yml文件</span></span><br><span class="line"><span class="attr">title:</span> <span class="number">01</span><span class="string">的世界</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">计算机的世界没有秘密</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">这里有关于计算机的方方面面</span></span><br><span class="line"><span class="attr">keywords:</span> <span class="number">01</span><span class="string">的世界</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">钉子哥</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span> <span class="comment"># 会影响主题中的语言选择</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">Asia/Shanghai</span></span><br><span class="line"></span><br><span class="line"><span class="string">//</span> <span class="string">本博客部署的地址</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://lhtin.gitee.io</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br></pre></td></tr></table></figure>
+
+<p>然后还需要根据我自己的要求，修改默认主题<a href="https://github.com/hexojs/hexo-theme-landscape" target="_blank" rel="noopener">landscape</a>的部分内容。所有修改的内容可以参见我fork出来的<a href="https://gitee.com/lhtin/hexo-theme-landscape" target="_blank" rel="noopener">仓库</a>。这里我列出主要的修改：</p>
+<ul>
+<li>将一些英文翻译为中文，比如Home -&gt; 首页，Read More -&gt; 阅读全文</li>
+<li>去掉tagcloud，调整widgets的顺序，打开展示分类和标签中对应的文章数量的flag</li>
+<li>添加百度统计，并和Google统计合并到一个ejs文件</li>
+<li>去掉文章头部的日期和分类展示。让文章标题居中展示，并且在文章下面展示文章作者和日期</li>
+<li>去掉右上角的导航，固定展示为“首页”</li>
+<li>修改首页展示文章摘抄的样式</li>
+</ul>
+<h3 id="构建和部署"><a href="#构建和部署" class="headerlink" title="构建和部署"></a>构建和部署</h3><p>当你写好了一篇博客文章之后，就需要构建成静态文件，以便上传到Gitee Pages上。Hexo在构建时，是根据所选主题中对应的<a href="https://ejs.co" target="_blank" rel="noopener">ejs模版</a>，填充所需参数（大部分来自yml文件和Markdown文件头部信息）和文章内容之后，就会生成HTML文件。</p>
+<p>生成HTML文件后，可以通过使用部署插件hexo-deployer-git，将生成的public目录中的文件自动上传到指定的git上，上传之前需要先在_config.yml中配置Git相关信息。</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 项目根目录下的_config.yml文件</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://gitee.com/lhtin/lhtin.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">page</span></span><br></pre></td></tr></table></figure>
+
+<p>构建和部署的命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm run build</span><br><span class="line">npm install --save-dev hexo-deployer-git</span><br><span class="line">npm run deploy</span><br></pre></td></tr></table></figure>
+
+<p>因为build和deploy经常一起用，于是我将两个命令整合成一个，取名d：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"scripts"</span>: &#123;</span><br><span class="line">    <span class="attr">"d"</span>: <span class="string">"npm run clean &amp;&amp; npm run build &amp;&amp; npm run deploy"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就完成了博客的构建和上传。上传完之后需要注意下，Gitee Pages并不支持自动更新你上传的内容，你需要手动进到项目中的Pages服务，点击更新进行手动更新。<del>或许可以直接集成到d命令中，push完之后直接调用Pages的更新接口。这个等以后有时间了再来折腾下。</del>目前已经可以通过命令行触发Pages自动部署了，更多内容可以参加<a href="https://www.npmjs.com/package/gitee" target="_blank" rel="noopener">gitee</a>这个npm模块。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/guide/" rel="tag">guide</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/06/25/llvm-0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          学习LLVM第0篇：LLVM项目介绍
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <p style="margin: 0 5px 20px; color: #555">旧博客地址：<a href="https://lhtin.gitee.io" target="_blank" rel="noopener">https://lhtin.gitee.io</a></p>
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/guide/">guide</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AC%94%E8%AE%B0/">笔记</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/guide/" rel="tag">guide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/07/17/nand2tetris-1/">Nand2Tetris Part 1 课程总结</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/09/llvm-1/">学习LLVM第1篇：官方入门教程笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/02/quickjs/">6月7日在OSDT线上技术讨论会上的分享视频</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/25/llvm-0/">学习LLVM第0篇：LLVM项目介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/14/hexo-guide/">本站建造过程记录</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 <a href="https://github.com/lhtin" target="_blank" rel="noopener">tintin</a><br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
