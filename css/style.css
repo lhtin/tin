@@ -1100,6 +1100,7 @@ a.article-title:hover {
   background: #eee;
   text-shadow: 0 1px #fff;
   padding: 0 0.3em;
+  word-break: break-word;
 }
 .article-entry pre code {
   background: none;
