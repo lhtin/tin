@@ -18,9 +18,11 @@ excerpt: 本文学习LLVM的第0篇文章，介绍LLVM项目的一些内容，�
    
    这里除了Ninja构建系统，其实也可以选择其他的，比如Unix Makefiles。其中CMake可以理解为给开发者使用的构建工具接口，至于实际的构建系统，开发者可以显式指定让CMake去使用，比如下面在生成实际的构建系统时，就用了Ninja（默认为Unix Makefiles）。
    
+   Mac系统建议使用[Brew](https://brew.sh)来安装，`brew install cmake ninja`，如果还需要编译文档，则需要安装doxygen、sphinx-doc，安装命令：`pip install sphinx=1.8.5`（使用brew安装时找不到这个版本的sphinx）、`brew install doxygen`。
+   
 2. 克隆LLVM仓库：`git clone https://github.com/llvm/llvm-project`
 
-   如果国内clone太慢，也可以使用Gitee提供的镜像仓库`https://gitee.com/mirrors/LLVM`（注意：镜像仓库目前每天同步一次，所以内容会有延后）
+   如果国内clone太慢，也可以使用Gitee提供的镜像仓库 https://gitee.com/mirrors/LLVM （注意：镜像仓库目前每天同步一次，所以内容会有延后）
 
 3. 创建构建目录，用于存放构建系统文件和构建出来的东西，比如在项目的根目录创建：`mkdir build`，然后进到构建目录： `cd build`
 
