@@ -2,9 +2,9 @@
 title: Nand2Tetris Part 1 课程总结
 date: 2020/07/17
 tag:
-- 笔记
+- nand2tetris
 category:
-- 笔记
+- note
 excerpt: 按：本文记录我在学习完Coursera上的 Nand2Tetris Part 1 课程之后的总结与思考。
 ---
 
