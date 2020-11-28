@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2cdbc7958f6df4fec3751794de6e9c63";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-2');
+  </script>
+
+
+
+  
+  <title>Java 笔记 | 01的世界</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本文为我学习Java的笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 笔记">
+<meta property="og:url" content="https://tintin.dev/2017/03/15/java/index.html">
+<meta property="og:site_name" content="01的世界">
+<meta property="og:description" content="本文为我学习Java的笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-03-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-28T14:23:02.948Z">
+<meta property="article:author" content="tintin">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" type="image/x-icon" href="/images/logo.jpg">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <span id="logo">01的世界</span>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://tintin.dev"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-java" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title article-title-tin" itemprop="headline name">
+      Java 笔记
+    </h1>
+  
+  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2017-03-14T16:00:00.000Z" itemprop="datePublished">2017-03-15</time></p>
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>阅读材料：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/tutorial/">The Java Tutorials</a></li>
+</ul>
+<h2 id="Getting-Started"><a href="#Getting-Started" class="headerlink" title="Getting Started"></a>Getting Started</h2><h3 id="About-the-Java-Technology"><a href="#About-the-Java-Technology" class="headerlink" title="About the Java Technology"></a>About the Java Technology</h3><p>Java technology is both a programming language and a platform.</p>
+<h4 id="The-Java-Programming-Language"><a href="#The-Java-Programming-Language" class="headerlink" title="The Java Programming Language"></a>The Java Programming Language</h4><p>Java 语言的特点: Simple, Architecture neutral, Object oriented, Portable, Distributed, High performance, Multithreaded, Robust, Dynamic, Secure. Each of the buzzwords explained in <a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/langenv-140151.html">The Java Language Environment</a></p>
+<p><code>file.java</code> – 由 javac 编译 -&gt; <code>file.class</code>(bytecode) – 由 Java VM 运行 -&gt; 得到运行结果</p>
+<p>[Java SE HotSpot at a Glance](Java SE HotSpot at a Glance)</p>
+<h4 id="The-Java-Platform"><a href="#The-Java-Platform" class="headerlink" title="The Java Platform"></a>The Java Platform</h4><p>A <em>platform</em> is the hardware or software environment in which a program runs.</p>
+<p>Java 平台是一个软件平台。</p>
+<p>The Java platform has two components:</p>
+<ul>
+<li>The Java Virtual Machine</li>
+<li>The Java Application Programming Interface (API)</li>
+</ul>
+<p>作为平台独立的运行环境，Java 平台比原生平台运行的更慢些。</p>
+<h3 id="What-can-Java-Technology-Do"><a href="#What-can-Java-Technology-Do" class="headerlink" title="What can Java Technology Do?"></a>What can Java Technology Do?</h3><h3 id="How-Will-Java-Technology-Change-My-Life"><a href="#How-Will-Java-Technology-Change-My-Life" class="headerlink" title="How Will Java Technology Change My Life?"></a>How Will Java Technology Change My Life?</h3><h2 id="Learning-the-Java-Language"><a href="#Learning-the-Java-Language" class="headerlink" title="Learning the Java Language"></a>Learning the Java Language</h2><h3 id="Object-Oriented-Programming-Concepts"><a href="#Object-Oriented-Programming-Concepts" class="headerlink" title="Object-Oriented Programming Concepts"></a>Object-Oriented Programming Concepts</h3><h4 id="What-Is-an-Object"><a href="#What-Is-an-Object" class="headerlink" title="What Is an Object?"></a>What Is an Object?</h4><p>对象由<strong>状态(fields)**和相应的</strong>行为(methods)**组成。是对真实世界中的物体的模拟。</p>
+<p>面向对象编程的基础概念是**数据封装(data encapsulation)**，也就是说对象把自己的内部变量隐藏，只通过自己的方法和外界进行交互。</p>
+<p>对象化所带来的好处：模块化、信息隐藏、代码复用、可插拔性和易于调试。</p>
+<h4 id="What-Is-a-Class"><a href="#What-Is-a-Class" class="headerlink" title="What Is a Class?"></a>What Is a Class?</h4><p>类是对象创建时所参考的蓝图，对象也可以叫做类的实例。</p>
+<h4 id="What-Is-Inheritance"><a href="#What-Is-Inheritance" class="headerlink" title="What Is Inheritance?"></a>What Is Inheritance?</h4><p><strong>继承</strong>用于抽象不同类之间的相似之处，使类之间层次清楚，代码易读。</p>
+<h4 id="What-Is-an-Interface"><a href="#What-Is-an-Interface" class="headerlink" title="What Is an Interface?"></a>What Is an Interface?</h4><p>对象通过<strong>接口</strong>与外界（其他对象）进行交互。</p>
+<h4 id="What-Is-a-Package"><a href="#What-Is-a-Package" class="headerlink" title="What Is a Package?"></a>What Is a Package?</h4><p><strong>包</strong>是用于组织一系列相关<strong>类</strong>和<strong>接口</strong>的命名空间。</p>
+<h2 id="Language-Basics"><a href="#Language-Basics" class="headerlink" title="Language Basics"></a>Language Basics</h2><h3 id="Variables"><a href="#Variables" class="headerlink" title="Variables"></a>Variables</h3><p>Java 中存在以下几种变量：</p>
+<ul>
+<li><strong>实例变量 (Instance Variables, Non-Static Fields)</strong></li>
+<li>**类变量 (Class Variables, Static Fields)**：使用 <code>static</code> 修饰符(modifiers)修饰的 fields</li>
+<li><strong>局部变量 (Local Variables)</strong></li>
+<li><strong>参数 (Parameters)</strong></li>
+</ul>
+<h3 id="Primitive-Data-Types"><a href="#Primitive-Data-Types" class="headerlink" title="Primitive Data Types"></a>Primitive Data Types</h3><blockquote>
+<p>The Java programming language is statically-typed, which means that all variables must first be declared before they can be used. This involves stating the variable’s type and name.</p>
+</blockquote>
+<p>八种原始数据类型：<code>byte</code>(8-bit), <code>short</code>(16-bit), <code>int</code>(32-bit), <code>long</code>(64-bit), <code>float</code>(32-bit IEEE 754), <code>double</code>(64-bit IEEE 754), <code>boolean</code>, <code>char</code>(16-bit Unicode character).</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int decVal &#x3D; 26; &#x2F;&#x2F; 十进制</span><br><span class="line">int hexVal &#x3D; 0x1a; &#x2F;&#x2F; 十六进制</span><br><span class="line">int binVal &#x3D; 0b11010; &#x2F;&#x2F; 二进制</span><br></pre></td></tr></table></figure>
+
+<h3 id="Array"><a href="#Array" class="headerlink" title="Array"></a>Array</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">int[] a &#x3D; new int[10];</span><br><span class="line"></span><br><span class="line">int[] b &#x3D; &#123;1, 2, 3, 4&#125;;</span><br><span class="line"></span><br><span class="line">int[][] xy &#x3D; &#123;</span><br><span class="line">    &#123;1, 2&#125;,</span><br><span class="line">    &#123;2, 4&#125;,</span><br><span class="line">    &#123;3, 9&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Operators"><a href="#Operators" class="headerlink" title="Operators"></a>Operators</h3><h3 id="Expressions-Statements-and-Blocks"><a href="#Expressions-Statements-and-Blocks" class="headerlink" title="Expressions, Statements, and Blocks"></a>Expressions, Statements, and Blocks</h3><p><strong>语句</strong>包括<strong>表达式语句</strong>、<strong>声明语句</strong>、<strong>流程控制语句</strong>。</p>
+<h3 id="Constrol-Flow-Statement"><a href="#Constrol-Flow-Statement" class="headerlink" title="Constrol Flow Statement"></a>Constrol Flow Statement</h3><p>常见流程控制语句：<code>if-then</code>, <code>switch</code>, <code>while</code>, <code>do-while</code>, <code>for</code>.</p>
+<h2 id="Classes-and-Objects"><a href="#Classes-and-Objects" class="headerlink" title="Classes and Objects"></a>Classes and Objects</h2><h3 id="Classes"><a href="#Classes" class="headerlink" title="Classes"></a>Classes</h3><h4 id="Declaring-Member-Variables"><a href="#Declaring-Member-Variables" class="headerlink" title="Declaring Member Variables"></a>Declaring Member Variables</h4><p>字段<strong>访问修饰符</strong>(Access Modifiers)：</p>
+<ul>
+<li><code>public</code>：所有类都可以访问</li>
+<li><code>private</code>：只能字段所属类访问</li>
+</ul>
+<h4 id="Defining-Methods"><a href="#Defining-Methods" class="headerlink" title="Defining Methods"></a>Defining Methods</h4><p>方法<strong>重载</strong>(overloading)</p>
+<blockquote>
+<p>Note: Overloaded methods should be used sparingly, as they can make code much less readable.</p>
+</blockquote>
+<h4 id="Providing-Constructors-for-Your-Classes"><a href="#Providing-Constructors-for-Your-Classes" class="headerlink" title="Providing Constructors for Your Classes"></a>Providing Constructors for Your Classes</h4><p>如果没有给类提供<strong>构造器</strong>，Java 编译器会自动补加一个默认的构造器，该构造器会调用父类的无参构造器。因此，如果父类提供无参构造器，编译器将会报错。</p>
+<p>形参(parameter)，实参(argument)。</p>
+<h4 id="Controlling-Access-to-Members-of-a-Class"><a href="#Controlling-Access-to-Members-of-a-Class" class="headerlink" title="Controlling Access to Members of a Class"></a>Controlling Access to Members of a Class</h4><p><strong>成员</strong>(members)指类中的字段和方法，包括类成员和实例成员。</p>
+<p>修饰符对成员的访问控制权限表：</p>
+<table>
+<thead>
+<tr>
+<th>Modifier</th>
+<th>Class</th>
+<th>Package</th>
+<th>Subclass</th>
+<th>World</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>public</code></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr>
+<td><code>protected</code></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>N</td>
+</tr>
+<tr>
+<td><em>no modifier</em></td>
+<td>Y</td>
+<td>Y</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr>
+<td><code>private</code></td>
+<td>Y</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+</tr>
+</tbody></table>
+<p><strong>修饰符</strong>(modifier)使用时请遵循最严原则，也就是说优先使用 <code>private</code>，有理由使用其它修饰符除外。除了常量外，避免使用 <code>public</code> 修饰符。使用 <code>public</code> 修饰符会导致暴露过多的细节给类使用者，限制了类的具体实现，影响了之后修改代码的灵活性。</p>
+<h4 id="Understanding-Class-Members"><a href="#Understanding-Class-Members" class="headerlink" title="Understanding Class Members"></a>Understanding Class Members</h4><p>类变量可以直接通过类访问到，而不需要先初始化。类方法也是如此，并且类方法的调用只建议从类上调用，而不要在实例上调用，方便和实例方法做区分。</p>
+<p>类方法只能访问类变量和类方法，而实例方法可以访问实例变量、实例方法、类变量、类方法。</p>
+<p>通过 <code>static</code> 和 <code>final</code> 修饰符定义常量。常量在编译成字节码之后，就固定不变了。也就是说，假如修改了某个类中的常量，其他使用这个常量的类也需要重现编译。</p>
+<h3 id="Nested-Classes"><a href="#Nested-Classes" class="headerlink" title="Nested Classes"></a>Nested Classes</h3><p>为什么要使用嵌套类：</p>
+<ul>
+<li>对类进行逻辑上的分类：只在某个类中使用的类就声明在这个类里面</li>
+<li>增加封装性：嵌套类可以访问包裹类中的所有成员</li>
+<li>使代码易读和维护：代码上挨的更近</li>
+</ul>
+<p>注：我觉得这几点还有待商榷。</p>
+<p>嵌套类分为 Static Nested Classes 和 Inner Classes。</p>
+<blockquote>
+<p>Note: A static nested class interacts with the instance members of its outer class (and other classes) just like any other top-level class. In effect, a static nested class is behaviorally a top-level class that has been nested in another top-level class for packaging convenience.</p>
+</blockquote>
+<p>方法中定义类(Local and Anonymous Classes)</p>
+<h3 id="Lambda-Expressions"><a href="#Lambda-Expressions" class="headerlink" title="Lambda Expressions"></a>Lambda Expressions</h3><blockquote>
+<p>The operations filter, map, and forEach are <em>aggregate operations</em>.</p>
+</blockquote>
+<p>注意，Lambda 表达式不会引入新的作用域，也就意味着在表达式中不能重复定义外面出现过的变量。</p>
+<h3 id="When-to-Use-Nested-Classes-Local-Classes-Anonymous-Classes-and-Lambda-Expressions"><a href="#When-to-Use-Nested-Classes-Local-Classes-Anonymous-Classes-and-Lambda-Expressions" class="headerlink" title="When to Use Nested Classes, Local Classes, Anonymous Classes, and Lambda Expressions"></a>When to Use Nested Classes, Local Classes, Anonymous Classes, and Lambda Expressions</h3><h3 id="Enum-Types"><a href="#Enum-Types" class="headerlink" title="Enum Types"></a>Enum Types</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">public enum Planet &#123;</span><br><span class="line">    MERCURY (3.303e+23, 2.4397e6),</span><br><span class="line">    VENUS   (4.869e+24, 6.0518e6),</span><br><span class="line">    EARTH   (5.976e+24, 6.37814e6),</span><br><span class="line">    MARS    (6.421e+23, 3.3972e6),</span><br><span class="line">    JUPITER (1.9e+27,   7.1492e7),</span><br><span class="line">    SATURN  (5.688e+26, 6.0268e7),</span><br><span class="line">    URANUS  (8.686e+25, 2.5559e7),</span><br><span class="line">    NEPTUNE (1.024e+26, 2.4746e7);</span><br><span class="line"></span><br><span class="line">    private final double mass;   &#x2F;&#x2F; in kilograms</span><br><span class="line">    private final double radius; &#x2F;&#x2F; in meters</span><br><span class="line">    Planet(double mass, double radius) &#123;</span><br><span class="line">        this.mass &#x3D; mass;</span><br><span class="line">        this.radius &#x3D; radius;</span><br><span class="line">    &#125;</span><br><span class="line">    private double mass() &#123; return mass; &#125;</span><br><span class="line">    private double radius() &#123; return radius; &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; universal gravitational constant  (m3 kg-1 s-2)</span><br><span class="line">    public static final double G &#x3D; 6.67300E-11;</span><br><span class="line"></span><br><span class="line">    double surfaceGravity() &#123;</span><br><span class="line">        return G * mass &#x2F; (radius * radius);</span><br><span class="line">    &#125;</span><br><span class="line">    double surfaceWeight(double otherMass) &#123;</span><br><span class="line">        return otherMass * surfaceGravity();</span><br><span class="line">    &#125;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        if (args.length !&#x3D; 1) &#123;</span><br><span class="line">            System.err.println(&quot;Usage: java Planet &lt;earth_weight&gt;&quot;);</span><br><span class="line">            System.exit(-1);</span><br><span class="line">        &#125;</span><br><span class="line">        double earthWeight &#x3D; Double.parseDouble(args[0]);</span><br><span class="line">        double mass &#x3D; earthWeight&#x2F;EARTH.surfaceGravity();</span><br><span class="line">        for (Planet p : Planet.values())</span><br><span class="line">           System.out.printf(&quot;Your weight on %s is %f%n&quot;,</span><br><span class="line">                             p, p.surfaceWeight(mass));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Annotations"><a href="#Annotations" class="headerlink" title="Annotations"></a>Annotations</h2><p><strong>注解</strong>(<em>annotation</em>)，给程序提供元数据，但不是程序的一部分。</p>
+<p>作用：</p>
+<ul>
+<li>给编译器提供信息</li>
+<li>编译和部署时处理，生成代码，XML文件等</li>
+<li>运行时处理</li>
+</ul>
+<p>一些注解用于替代代码中的<strong>注释</strong>(<em>comment</em>)。</p>
+<p>一些注解用于其他注解上面，称为<strong>元注解</strong>(<em>meta-annotation</em>)。</p>
+<h2 id="Interfaces"><a href="#Interfaces" class="headerlink" title="Interfaces"></a>Interfaces</h2><p><strong>接口</strong>(<em>interface</em>)是<strong>引用类型</strong>(<em>reference type</em>)，可以包含<strong>抽象方法</strong>(<em>abstract method</em>)、<strong>默认方法</strong>(<em>default method</em>)、<strong>静态方法</strong>(<em>static method</em>)、<strong>常量</strong>(<em>constant</em>)。</p>
+<p>当需要扩充接口，但又不希望之前实现该接口的类进行修改时，可以通过定义默认方法或者静态方法来达到目的。</p>
+<h2 id="Inheritance"><a href="#Inheritance" class="headerlink" title="Inheritance"></a>Inheritance</h2><p>子类<strong>继承</strong>(*inheritance**)父类中被 <code>public</code> 和 <code>protected</code> 修饰的成员(members)。如果子类和父类属于同一个 package，那么子类还继承了父类中的 <em>package-private</em> 成员。</p>
+<p>作为所有类的祖先 Object 类（它自己没有父类了），它含有的以下方法会被继承：</p>
+<ul>
+<li><code>protected Object clone() throws CloneNotSupportedException</code></li>
+<li><code>public boolean equals(Object obj)</code></li>
+<li><code>protected void finalize() throws Throwable</code></li>
+<li><code>public final Class getClass()</code></li>
+<li><code>public int hashCode()</code></li>
+<li><code>public String toString()</code></li>
+</ul>
+<h3 id="Polymorphism"><a href="#Polymorphism" class="headerlink" title="Polymorphism"></a>Polymorphism</h3><p><strong>多态</strong>(<em>polymorphism</em>)</p>
+<blockquote>
+<p>The Java virtual machine (JVM) calls the appropriate method for the object that is referred to in each variable. It does not call the method that is defined by the variable’s type. This behavior is referred to as <em>virtual method invocation</em> and demonstrates an aspect of the important polymorphism features in the Java language.</p>
+</blockquote>
+<h2 id="Packages"><a href="#Packages" class="headerlink" title="Packages"></a>Packages</h2><blockquote>
+<p>Definition: A <em>package</em> is a grouping of related types providing access protection and name space management. Note that <em>types</em> refers to classes, interfaces, enumerations, and annotation types.</p>
+</blockquote>
+<blockquote>
+<p>For convenience, the Java compiler automatically imports two entire packages for each source file: (1) the java.lang package and (2) the current package (the package for the current file).</p>
+</blockquote>
+<blockquote>
+<p>Both the compiler and the JVM construct the path to your .class files by adding the package name to the <em>class path</em>.</p>
+</blockquote>
+<h2 id="泛型-Generics"><a href="#泛型-Generics" class="headerlink" title="泛型(Generics)"></a>泛型(Generics)</h2><blockquote>
+<p>In a nutshell, generics enable <em>types</em> (classes and interfaces) to be parameters when defining classes, interfaces and methods. Much like the more familiar <em>formal parameters</em> used in method declarations, type parameters provide a way for you to re-use the same code with different inputs. The difference is that the inputs to formal parameters are values, while the inputs to type parameters are types.</p>
+</blockquote>
+<blockquote>
+<p>Code that uses generics has many benefits over non-generic code:</p>
+<ul>
+<li>Stronger type checks at compile time.</li>
+<li>Elimination of casts.</li>
+<li>Enabling programmers to implement generic algorithms.</li>
+</ul>
+</blockquote>
+<p>动态指定类型，可以在类中，也可以在方法中。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/10/17/prize-in-economics-2017/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          2017年诺贝尔经济学奖
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/02/04/tspl4/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">The Scheme Programming Language 摘抄笔记及习题答案</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/note/">note</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/react/">react</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%84%E8%AE%BA/">评论</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/design/" rel="tag">design</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/econ/" rel="tag">econ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/note/" rel="tag">note</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scheme/" rel="tag">scheme</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ukulele/" rel="tag">ukulele</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" rel="tag">经济学</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/07/17/nand2tetris-1/">Nand2Tetris Part 1 课程总结</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/09/llvm-1/">学习LLVM第1篇：官方入门教程笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/02/quickjs/">6月7日在OSDT线上技术讨论会上的分享视频</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/25/llvm-0/">学习LLVM第0篇：LLVM项目介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2019/05/13/react-1/">玩转React系列1：React工作原理</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 <a target="_blank" rel="noopener" href="https://github.com/lhtin">tintin</a><br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

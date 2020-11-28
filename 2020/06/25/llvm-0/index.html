@@ -59,7 +59,7 @@
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
-<meta name="generator" content="Hexo 4.2.1"></head>
+<meta name="generator" content="Hexo 5.2.0"></head>
 
 <body>
   <div id="container">
@@ -71,10 +71,6 @@
       <h1 id="logo-wrap">
         <span id="logo">01的世界</span>
       </h1>
-      
-        <h2 id="subtitle-wrap">
-          <span id="subtitle">计算机的世界没有秘密。</span>
-        </h2>
       
     </div>
     <div id="header-inner" class="inner">
@@ -113,14 +109,14 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>更全面的内容请直接参考<a href="https://llvm.org/docs" target="_blank" rel="noopener">官方文档</a>，这里仅列出我在学习LLVM时用到的一些编译命令及遇到的问题，还会有些文档中没有提到的内容。</p>
+        <p>更全面的内容请直接参考<a target="_blank" rel="noopener" href="https://llvm.org/docs">官方文档</a>，这里仅列出我在学习LLVM时用到的一些编译命令及遇到的问题，还会有些文档中没有提到的内容。</p>
 <h2 id="编译项目"><a href="#编译项目" class="headerlink" title="编译项目"></a>编译项目</h2><ol>
-<li><p>安装<a href="https://cmake.org" target="_blank" rel="noopener">CMake</a>、<a href="https://ninja-build.org" target="_blank" rel="noopener">Ninja</a>构建工具。</p>
+<li><p>安装<a target="_blank" rel="noopener" href="https://cmake.org/">CMake</a>、<a target="_blank" rel="noopener" href="https://ninja-build.org/">Ninja</a>构建工具。</p>
 <p>这里除了Ninja构建系统，其实也可以选择其他的，比如Unix Makefiles。其中CMake可以理解为给开发者使用的构建工具接口，至于实际的构建系统，开发者可以显式指定让CMake去使用，比如下面在生成实际的构建系统时，就用了Ninja（默认为Unix Makefiles）。</p>
-<p>Mac系统建议使用<a href="https://brew.sh" target="_blank" rel="noopener">Brew</a>来安装，<code>brew install cmake ninja</code>，如果还需要编译文档，则需要安装doxygen、sphinx-doc，安装命令：<code>pip install sphinx=1.8.5</code>（使用brew安装时找不到这个版本的sphinx）、<code>brew install doxygen</code>。</p>
+<p>Mac系统建议使用<a target="_blank" rel="noopener" href="https://brew.sh/">Brew</a>来安装，<code>brew install cmake ninja</code>，如果还需要编译文档，则需要安装doxygen、sphinx-doc，安装命令：<code>pip install sphinx=1.8.5</code>（使用brew安装时找不到这个版本的sphinx）、<code>brew install doxygen</code>。</p>
 </li>
 <li><p>克隆LLVM仓库：<code>git clone https://github.com/llvm/llvm-project</code></p>
-<p>如果国内clone太慢，也可以使用Gitee提供的镜像仓库 <a href="https://gitee.com/mirrors/LLVM" target="_blank" rel="noopener">https://gitee.com/mirrors/LLVM</a> （注意：镜像仓库目前每天同步一次，所以内容会有延后）</p>
+<p>如果国内clone太慢，也可以使用Gitee提供的镜像仓库 <a target="_blank" rel="noopener" href="https://gitee.com/mirrors/LLVM">https://gitee.com/mirrors/LLVM</a> （注意：镜像仓库目前每天同步一次，所以内容会有延后）</p>
 </li>
 <li><p>创建构建目录，用于存放构建系统文件和构建出来的东西，比如在项目的根目录创建：<code>mkdir build</code>，然后进到构建目录： <code>cd build</code></p>
 </li>
@@ -133,9 +129,9 @@
 <li><p><code>LLVM_TARGETS_TO_BUILD</code>：比如<code>&quot;X86;RISCV&quot;</code>。指定LLVM后端支持的目标架构，比如<code>X86</code>、<code>ARM</code>、<code>RISCV</code>、<code>WebAssembly</code></p>
 <p>小提示：所有支持的目标架构可以去看<code>llvm/CMakeLists.txt</code>文件中的<code>LLVM_ALL_TARGETS</code>变量的内容。当前的内容为：<code>AArch64;AMDGPU;ARM;AVR;BPF;Hexagon;Lanai;Mips;MSP430;NVPTX;PowerPC;RISCV;Sparc;SystemZ;WebAssembly;X86;XCore</code></p>
 </li>
-<li><p><code>LLVM_ENABLE_SPHINX</code>：是否编译LLVM文档。<code>ON</code>表示启动。依赖<a href="https://www.sphinx-doc.org" target="_blank" rel="noopener">Sphinx</a></p>
+<li><p><code>LLVM_ENABLE_SPHINX</code>：是否编译LLVM文档。<code>ON</code>表示启动。依赖<a target="_blank" rel="noopener" href="https://www.sphinx-doc.org/">Sphinx</a></p>
 </li>
-<li><p><code>LLVM_ENABLE_DOXYGEN</code>：是否编译LLVM API文档。<code>ON</code>表示启动。依赖<a href="https://www.doxygen.nl" target="_blank" rel="noopener">Doxygen</a></p>
+<li><p><code>LLVM_ENABLE_DOXYGEN</code>：是否编译LLVM API文档。<code>ON</code>表示启动。依赖<a target="_blank" rel="noopener" href="https://www.doxygen.nl/">Doxygen</a></p>
 </li>
 </ul>
 </li>
@@ -154,12 +150,12 @@
 </li>
 </ol>
 <p>将前面的命令放在一起方便拷贝：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/llvm/llvm-project</span><br><span class="line">// Gitee源：git clone https://gitee.com/mirrors/LLVM</span><br><span class="line">cd llvm-project &amp;&amp; mkdir build &amp;&amp; cd build</span><br><span class="line">cmake -G Ninja\</span><br><span class="line">  -DLLVM_ENABLE_PROJECTS="clang;libcxx"\</span><br><span class="line">  -DLLVM_TARGETS_TO_BUILD="X86"\</span><br><span class="line">  -DLLVM_ENABLE_SPHINX=ON\</span><br><span class="line">  -DLLVM_ENABLE_DOXYGEN=ON\</span><br><span class="line">  ../llvm</span><br><span class="line">cmake --build . // 编译llvm、clang、libcxx</span><br><span class="line">cmake --build . --target docs-llvm-html // 编译LLVM文档</span><br><span class="line">cmake --build . --target doxygen-llvm // 编译LLVM API文档</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/llvm/llvm-project</span><br><span class="line">// Gitee源：git clone https://gitee.com/mirrors/LLVM</span><br><span class="line">cd llvm-project &amp;&amp; mkdir build &amp;&amp; cd build</span><br><span class="line">cmake -G Ninja\</span><br><span class="line">  -DLLVM_ENABLE_PROJECTS=&quot;clang;libcxx&quot;\</span><br><span class="line">  -DLLVM_TARGETS_TO_BUILD=&quot;X86&quot;\</span><br><span class="line">  -DLLVM_ENABLE_SPHINX=ON\</span><br><span class="line">  -DLLVM_ENABLE_DOXYGEN=ON\</span><br><span class="line">  ../llvm</span><br><span class="line">cmake --build . // 编译llvm、clang、libcxx</span><br><span class="line">cmake --build . --target docs-llvm-html // 编译LLVM文档</span><br><span class="line">cmake --build . --target doxygen-llvm // 编译LLVM API文档</span><br></pre></td></tr></table></figure>
 
 <p>官方文档参考：</p>
 <ul>
-<li><a href="https://llvm.org/docs/GettingStarted.html" target="_blank" rel="noopener">Getting Started with the LLVM System</a>：介绍了编译项目的基本步骤，常用参数</li>
-<li><a href="https://llvm.org/docs/CMake.html" target="_blank" rel="noopener">Building LLVM with CMake</a>：更详细的介绍了CMake构建系统，包括CMake的基本使用和所有支持的参数</li>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/GettingStarted.html">Getting Started with the LLVM System</a>：介绍了编译项目的基本步骤，常用参数</li>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CMake.html">Building LLVM with CMake</a>：更详细的介绍了CMake构建系统，包括CMake的基本使用和所有支持的参数</li>
 </ul>
 <h2 id="常用LLVM命令"><a href="#常用LLVM命令" class="headerlink" title="常用LLVM命令"></a>常用LLVM命令</h2><ul>
 <li>clang<ul>
@@ -167,29 +163,29 @@
 <li><code>clang -c -emit-llvm input.c -o out.bc</code>：生成二进制LLVM IR，也可以不加<code>-c</code>，默认编译为二进制IR</li>
 </ul>
 </li>
-<li><a href="https://llvm.org/docs/CommandGuide/opt.html" target="_blank" rel="noopener">opt</a><ul>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/opt.html">opt</a><ul>
 <li><code>opt -load-pass-plugin=libHelloWorld.dylib -passes=&quot;hello-world&quot; a.ll</code>：使用HelloWorld Pass对<code>out.ll</code>进行处理。注意这是新的单独调用Pass的方式，老的方式为：<code>opt -load libHelloWorld.dylib -legacy-hello-world a.ll</code></li>
 <li><code>opt -analyze -view-cfg a.ll</code> 生成控制流程图（Control-flow graph），可以很方便的查看函数中的各种BB及BB直接的跳转。</li>
 </ul>
 </li>
-<li><a href="https://llvm.org/docs/CommandGuide/llvm-as.html" target="_blank" rel="noopener">llvm-as</a>、<a href="https://llvm.org/docs/CommandGuide/llvm-dis.html" target="_blank" rel="noopener">llvm-dis</a><ul>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/llvm-as.html">llvm-as</a>、<a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/llvm-dis.html">llvm-dis</a><ul>
 <li><code>llvm-as a.ll -o a.bc</code>：将人可读的LLVM IR编译为二进制LLVM IR</li>
 <li><code>llvm-dis a.bc -o a.ll</code>：将二进制LLVM IR反编译为人可读的LLVM IR</li>
 </ul>
 </li>
-<li><a href="https://llvm.org/docs/CommandGuide/llc.html" target="_blank" rel="noopener">llc</a><ul>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/llc.html">llc</a><ul>
 <li><code>llc a.ll -o a.out</code>：将LLVM IR编译为汇编代码，进而可以使用原生汇编器编译为可执行文件</li>
 </ul>
 </li>
-<li><a href="https://llvm.org/docs/CommandGuide/lli.html" target="_blank" rel="noopener">lli</a><ul>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/lli.html">lli</a><ul>
 <li><code>lli a.ll</code>：直接解释执行LLVM IR</li>
 </ul>
 </li>
-<li><a href="https://llvm.org/docs/CommandGuide/llvm-link.html" target="_blank" rel="noopener">llvm-link</a><ul>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/llvm-link.html">llvm-link</a><ul>
 <li><code>llvm-link -S add.ll main.ll -o all.ll</code>：链接多个LLVM IR为一个LLVM IR文件，<code>-S</code>表示输出的为人可读的LLVM IR，默认为二进制LLVM IR</li>
 </ul>
 </li>
-<li><a href="https://llvm.org/docs/CommandGuide/llvm-config.html" target="_blank" rel="noopener">llvm-config</a>：使用<code>llvm-config --help</code>查看帮助。给依赖LLVM的项目提供支持，输出LLVM库的头文件地址、库文件地址、库列表。<ul>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/llvm-config.html">llvm-config</a>：使用<code>llvm-config --help</code>查看帮助。给依赖LLVM的项目提供支持，输出LLVM库的头文件地址、库文件地址、库列表。<ul>
 <li><code>llvm-config --cxxflags</code>：生成编译时的头文件库参数，比如在我电脑上会输出<code>-I/usr/local/Cellar/llvm/10.0.0_3/include -std=c++14 -stdlib=libc++  -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS</code></li>
 <li><code>llvm-config --ldflags</code>：生成链接时的LLVM库文件地址，比如在我电脑上会输出<code>-L/usr/local/Cellar/llvm/10.0.0_3/lib -Wl,-search_paths_first -Wl,-headerpad_max_install_names</code></li>
 <li><code>llvm-config --libs</code>：生成LLVM提供的库名称，结合<code>llvm-config --ldflags</code>，就可以让链接器找到对应的库文件。在<code>--libs</code>后面还可以添加各种组件名称，不添加表示所有组件。比如<code>--libs core native</code>，则只会输出core和native组件相关的库。通过下面的<code>llvm-config --components</code>命令可以列举出所有的LLVM组件列表</li>
@@ -199,7 +195,7 @@
 </ul>
 <p>官方文档参考：</p>
 <ul>
-<li><a href="https://llvm.org/docs/CommandGuide/index.html" target="_blank" rel="noopener">LLVM Command Guide</a>：命令行工具使用说明</li>
+<li><a target="_blank" rel="noopener" href="https://llvm.org/docs/CommandGuide/index.html">LLVM Command Guide</a>：命令行工具使用说明</li>
 </ul>
 <!--
 ## LLVM项目结构简介
@@ -229,9 +225,9 @@
     </a>
   
   
-    <a href="/2020/06/14/hexo-guide/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2019/05/13/react-1/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">上一篇</strong>
-      <div class="article-nav-title">本站建造过程记录</div>
+      <div class="article-nav-title">玩转React系列1：React工作原理</div>
     </a>
   
 </nav>
@@ -247,10 +243,9 @@
   
     
   <div class="widget-wrap">
-    <p style="margin: 0 5px 20px; color: #555">旧博客地址：<a href="https://lhtin.gitee.io" target="_blank" rel="noopener">https://lhtin.gitee.io</a></p>
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -260,7 +255,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/guide/">guide</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AC%94%E8%AE%B0/">笔记</a><span class="category-list-count">1</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/note/">note</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/react/">react</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%84%E8%AE%BA/">评论</a><span class="category-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -270,7 +265,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/guide/" rel="tag">guide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/design/" rel="tag">design</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/econ/" rel="tag">econ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/note/" rel="tag">note</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scheme/" rel="tag">scheme</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ukulele/" rel="tag">ukulele</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" rel="tag">经济学</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -299,7 +294,7 @@
           </li>
         
           <li>
-            <a href="/2020/06/14/hexo-guide/">本站建造过程记录</a>
+            <a href="/2019/05/13/react-1/">玩转React系列1：React工作原理</a>
           </li>
         
       </ul>
@@ -314,7 +309,7 @@
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2020 <a href="https://github.com/lhtin" target="_blank" rel="noopener">tintin</a><br>
+      &copy; 2020 <a target="_blank" rel="noopener" href="https://github.com/lhtin">tintin</a><br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
