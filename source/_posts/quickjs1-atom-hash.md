@@ -1,5 +1,5 @@
 ---
-title: QuickJS源代码分析系列：QuickJS中的atom设计
+title: QuickJS中的atom设计
 date: 2020-11-28
 categories:
 - note
@@ -20,7 +20,7 @@ QuickJS源码中的atom（32位无符号整数）可以认为是字符串（覆�
 3. 将原来`atom_hash`的`hash_index`位置对应的`atom_index`存放到`s.hash_next`中，再将其修改为`free_atom_index`（这一步如果atom的个数大于`atom_hash`可以存放的数量的两倍，则将`atom_hash`扩充到原来的2倍容量）
 4. 将第二步添加到`atom_array`中的位置（`atom_index`）作为该字符串的atom值，在后续的程序中使用
 
-接下来展示下上述内容在源代码中的具体展现：
+接下来展示上述内容在源代码中的具体展现：
 
 首先涉及到的数据类型如下：
 
