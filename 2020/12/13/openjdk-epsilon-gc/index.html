@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2cdbc7958f6df4fec3751794de6e9c63";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-2');
+  </script>
+
+
+
+  
+  <title>OpenJDK中的Epsilon GC | 01的世界</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本文介绍OpenJDK中的Epsilon GC，包括内存分配方式、跟Runtime的对接。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenJDK中的Epsilon GC">
+<meta property="og:url" content="https://tintin.dev/2020/12/13/openjdk-epsilon-gc/index.html">
+<meta property="og:site_name" content="01的世界">
+<meta property="og:description" content="本文介绍OpenJDK中的Epsilon GC，包括内存分配方式、跟Runtime的对接。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-12T17:18:23.625Z">
+<meta property="article:author" content="tintin">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" type="image/x-icon" href="/images/logo.jpg">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <span id="logo">01的世界</span>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://tintin.dev"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-openjdk-epsilon-gc" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title article-title-tin" itemprop="headline name">
+      OpenJDK中的Epsilon GC
+    </h1>
+  
+  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2020-12-12T16:00:00.000Z" itemprop="datePublished">2020-12-13</time></p>
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="OpenJDK中的Epsilon-GC"><a href="#OpenJDK中的Epsilon-GC" class="headerlink" title="OpenJDK中的Epsilon GC"></a>OpenJDK中的Epsilon GC</h1><p>Epsilon GC实际上是no-op GC（即只进行内存分配，不进行内存回收）。本文用于介绍Epsilon GC的内存分配方式，以及GC是如何与HotSpot JVM的其他部分打交道的。</p>
+<p>通过 <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/304">JEP 304: Garbage Collector Interface</a> 提案，HotSpot为各个GC抽象出了一套统一的GC接口。这使得新GC可以像插件一样很轻松地添加到JVM中。添加时，除了自身的代码，对JVM中其他代码的改动非常小且很容易修改（改动的主要目的是为了让JVM能识别出新GC）。而后面添加到JVM中的Epsilon GC（<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/318">JEP 318</a>）就是这个 JEP 304 提案的受益者，反过来也说明 JEP 304 提案实现的非常好。</p>
+<p>每个GC都需要实现<code>GCArguments</code>、<code>CollectedHeap</code>等约定的接口。当运行JVM时，会通过参数和默认值选择本次要使用的GC，其实就是确定初始化哪个GC的<code>GCArguments</code>子类。比如通过参数<code>-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC</code>，就可以激活Epsilon GC，初始化<code>GCArguments</code>的子类<code>EpsilonArguments</code>。其中有一个<code>create_heap</code>方法必须实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GCArguments</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> CollectedHeap* <span class="title">create_heap</span><span class="params">()</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonArguments</span> :</span> <span class="keyword">public</span> GCArguments &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> CollectedHeap* <span class="title">create_heap</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">CollectedHeap* <span class="title">EpsilonArguments::create_heap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> EpsilonHeap();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>create_heap</code>方法返回<code>CollectedHeap</code>子类实例，这个类是内存管理的核心类，要求子类必须实现统一的内存分配和回收接口：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CollectedHeap</span> :</span> <span class="keyword">public</span> CHeapObj&lt;mtInternal&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> HeapWord* <span class="title">mem_allocate</span><span class="params">(<span class="keyword">size_t</span> size,</span></span></span><br><span class="line"><span class="function"><span class="params">                                 <span class="keyword">bool</span>* gc_overhead_limit_was_exceeded)</span> </span>= <span class="number">0</span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> HeapWord* <span class="title">allocate_new_tlab</span><span class="params">(<span class="keyword">size_t</span> min_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                                      <span class="keyword">size_t</span> requested_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                                      <span class="keyword">size_t</span>* actual_size)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">collect</span><span class="params">(GCCause::Cause cause)</span> </span>= <span class="number">0</span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">do_full_collection</span><span class="params">(<span class="keyword">bool</span> clear_all_soft_refs)</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面来看下Epsilon GC中的这几个接口的实现。</p>
+<h3 id="mem-allocate"><a href="#mem-allocate" class="headerlink" title="mem_allocate"></a><code>mem_allocate</code></h3><p>功能：直接从堆内存分配，分配时需要加锁。这里有做优化，首先通过<code>_space-&gt;par_allocate(size)</code>分配，使用到了CAS解决多线程分配问题。如果空间不足，加锁扩充内存，然后再进行分配。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HeapWord* <span class="title">EpsilonHeap::mem_allocate</span><span class="params">(<span class="keyword">size_t</span> size, <span class="keyword">bool</span> *gc_overhead_limit_was_exceeded)</span> </span>&#123;</span><br><span class="line">  *gc_overhead_limit_was_exceeded = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">return</span> allocate_work(size);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">HeapWord* <span class="title">EpsilonHeap::allocate_work</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</span><br><span class="line">  HeapWord* res = _space-&gt;par_allocate(size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (res == <span class="literal">NULL</span>) &#123;</span><br><span class="line">    <span class="function">MutexLocker <span class="title">ml</span><span class="params">(Heap_lock)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">size_t</span> space_left = max_capacity() - capacity();</span><br><span class="line">    <span class="keyword">size_t</span> want_space = MAX2(size, EpsilonMinHeapExpand);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (want_space &lt; space_left) &#123;</span><br><span class="line">      <span class="keyword">bool</span> expand = _virtual_space.expand_by(want_space);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (size &lt; space_left) &#123;</span><br><span class="line">      <span class="keyword">bool</span> expand = _virtual_space.expand_by(space_left);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _space-&gt;set_end((HeapWord *) _virtual_space.high());</span><br><span class="line">    res = _space-&gt;par_allocate(size);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的分配我觉得可以再优化下：</p>
+<ol>
+<li>进入锁的区域后，再尝试分配一次，因为有可能已经有空间了，可以减少堆空间的分配</li>
+<li>将<code>res = _space-&gt;par_allocate(size)</code>移出锁的区域，可以减少锁的阻塞时间</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HeapWord* <span class="title">EpsilonHeap::allocate_work</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</span><br><span class="line">  HeapWord* res = _space-&gt;par_allocate(size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (res == <span class="literal">NULL</span>) &#123;</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="function">MutexLocker <span class="title">ml</span><span class="params">(Heap_lock)</span></span>;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/// 再尝试分配一次</span></span><br><span class="line">      res = _space-&gt;par_allocate(size);</span><br><span class="line">      <span class="keyword">if</span> (res != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">size_t</span> space_left = max_capacity() - capacity();</span><br><span class="line">      <span class="keyword">size_t</span> want_space = MAX2(size, EpsilonMinHeapExpand);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (want_space &lt; space_left) &#123;</span><br><span class="line">        <span class="keyword">bool</span> expand = _virtual_space.expand_by(want_space);</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (size &lt; space_left) &#123;</span><br><span class="line">        <span class="keyword">bool</span> expand = _virtual_space.expand_by(space_left);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      _space-&gt;set_end((HeapWord *) _virtual_space.high());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// 移到了锁的外面，这里的分配可以并发</span></span><br><span class="line">    res = _space-&gt;par_allocate(size);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="allocate-new-tlab"><a href="#allocate-new-tlab" class="headerlink" title="allocate_new_tlab"></a><code>allocate_new_tlab</code></h3><p>功能：分配一个线程独享的内存块（TLAB，Thread Local Allocation Buffer），从这块内存块中分配内存时不需要加锁。主要的逻辑是先确认需要分配的TLAB内存的大小，然后调用前面的<code>allocate_work</code>方法进行分配。如果开启了<code>-XX:EpsilonElasticTLAB</code>等参数，TLAB的大小会动态进行调整。比如会根据设置的比例进行上调，如果超过某个时间，又会从<code>min_size</code>开始递增。这样做的目的是为了平衡TLAB块分配的次数和内存消耗。</p>
+<p>JVM会调用GC提供的该方法获得TLAB块，然后在分配内存时，通过简单的指针移动进行快速的内存分配。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HeapWord* <span class="title">EpsilonHeap::allocate_new_tlab</span><span class="params">(<span class="keyword">size_t</span> min_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                                         <span class="keyword">size_t</span> requested_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                                         <span class="keyword">size_t</span>* actual_size)</span> </span>&#123;</span><br><span class="line">  Thread* thread = Thread::current();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">bool</span> fits = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">size_t</span> size = requested_size;</span><br><span class="line">  <span class="keyword">size_t</span> ergo_tlab = requested_size;</span><br><span class="line">  <span class="keyword">int64_t</span> time = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (EpsilonElasticTLAB) &#123;</span><br><span class="line">    ergo_tlab = EpsilonThreadLocalData::ergo_tlab_size(thread);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (EpsilonElasticTLABDecay) &#123;</span><br><span class="line">      <span class="keyword">int64_t</span> last_time = EpsilonThreadLocalData::last_tlab_time(thread);</span><br><span class="line">      time = (<span class="keyword">int64_t</span>) os::javaTimeNanos();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (last_time != <span class="number">0</span> &amp;&amp; (time - last_time &gt; _decay_time_ns)) &#123;</span><br><span class="line">        ergo_tlab = <span class="number">0</span>;</span><br><span class="line">        EpsilonThreadLocalData::set_ergo_tlab_size(thread, <span class="number">0</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fits = (requested_size &lt;= ergo_tlab);</span><br><span class="line">    <span class="keyword">if</span> (!fits) &#123;</span><br><span class="line">      size = (<span class="keyword">size_t</span>) (ergo_tlab * EpsilonTLABElasticity);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  size = clamp(size, min_size, _max_tlab_size);</span><br><span class="line">  size = align_up(size, MinObjAlignment);</span><br><span class="line"></span><br><span class="line">  HeapWord* res = allocate_work(size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (res != <span class="literal">NULL</span>) &#123;</span><br><span class="line">    *actual_size = size;</span><br><span class="line">    <span class="keyword">if</span> (EpsilonElasticTLABDecay) &#123;</span><br><span class="line">      EpsilonThreadLocalData::set_last_tlab_time(thread, time);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (EpsilonElasticTLAB &amp;&amp; !fits) &#123;</span><br><span class="line">      EpsilonThreadLocalData::set_ergo_tlab_size(thread, size);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (EpsilonElasticTLAB) &#123;</span><br><span class="line">      EpsilonThreadLocalData::set_ergo_tlab_size(thread, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，存储跟线程绑定的数据（<code>EpsilonThreadLocalData</code>）是在<code>EpsilonBarrierSet</code>类中初始化的。利用Runtime提供的<code>on_thread_create</code>和<code>on_thread_destroy</code>方法进行创建和销毁：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonBarrierSet</span>:</span> <span class="keyword">public</span> BarrierSet &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">on_thread_create</span><span class="params">(Thread* thread)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">on_thread_destroy</span><span class="params">(Thread* thread)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonBarrierSet::on_thread_create</span><span class="params">(Thread *thread)</span> </span>&#123;</span><br><span class="line">  EpsilonThreadLocalData::create(thread);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonBarrierSet::on_thread_destroy</span><span class="params">(Thread *thread)</span> </span>&#123;</span><br><span class="line">  EpsilonThreadLocalData::destroy(thread);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="collect、do-full-collection"><a href="#collect、do-full-collection" class="headerlink" title="collect、do_full_collection"></a><code>collect</code>、<code>do_full_collection</code></h3><p>功能：这两个方法用于进行垃圾回收。因为Epsilon GC的定位就是只分配内存，不回收，所以并不会做啥具体的事情。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::collect</span><span class="params">(GCCause::Cause cause)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">switch</span> (cause) &#123;</span><br><span class="line">    <span class="keyword">case</span> GCCause::_metadata_GC_threshold:</span><br><span class="line">    <span class="keyword">case</span> GCCause::_metadata_GC_clear_soft_refs:</span><br><span class="line">      log_info(gc)(<span class="string">&quot;GC request for \&quot;%s\&quot; is handled&quot;</span>, GCCause::to_string(cause));</span><br><span class="line">      MetaspaceGC::compute_new_size();</span><br><span class="line">      print_metaspace_info();</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      log_info(gc)(<span class="string">&quot;GC request for \&quot;%s\&quot; is ignored&quot;</span>, GCCause::to_string(cause));</span><br><span class="line">  &#125;</span><br><span class="line">  _monitoring_support-&gt;update_counters();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::do_full_collection</span><span class="params">(<span class="keyword">bool</span> clear_all_soft_refs)</span> </span>&#123;</span><br><span class="line">  collect(gc_cause());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Epsilon GC涉及的所有类如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">EpsilonArguments</span><br><span class="line">  - create_heap 创建EspilonHeap对象</span><br><span class="line"></span><br><span class="line">EpsilonHeap</span><br><span class="line">  - allocate_new_tlab 分配新TLAB</span><br><span class="line">  - mem_allocate 直接从堆上分配内存（大对象）</span><br><span class="line">  - allocate_work 实际堆内存分配实现，供上面两个方法使用</span><br><span class="line">  - collect 进行垃圾回收（实际上不会做任何事情，只是实现下接口）</span><br><span class="line">  - do_full_collection 进行垃圾回收（实际上不会做任何事情，只是实现下接口）</span><br><span class="line"></span><br><span class="line">EpsilonBarrierSet</span><br><span class="line">  - on_thread_create 用户线程创建时的回调</span><br><span class="line">  - on_thread_destroy 用户线程销毁时的回调</span><br><span class="line"></span><br><span class="line">EpsilonThreadLocalData 存储动态TLAB块大小的信息</span><br><span class="line"></span><br><span class="line">EpsilonMemoryPool 提供内存使用情况的接口</span><br><span class="line">  - committed_in_bytes 申请了的内存</span><br><span class="line">  - used_in_bytes 当前使用了的内存</span><br><span class="line">  - max_size 最大内存</span><br><span class="line"></span><br><span class="line">EpsilonInitLogger 日志输出相关</span><br><span class="line">EpsilonMonitoringSupport 监控相关</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><p>Do It Yourself (OpenJDK) Garbage Collector: <a target="_blank" rel="noopener" href="https://shipilev.net/jvm/diy-gc/">https://shipilev.net/jvm/diy-gc/</a></p>
+<p>这篇文章介绍了如何给Epsilon GC添加垃圾回收功能，主要内容集中在垃圾回收代码上，本文没有涉及到这块。</p>
+</li>
+<li><p>Writing your own Garbage Collector for JDK12: <a target="_blank" rel="noopener" href="https://medium.com/@unmeshvjoshi/writing-your-own-garbage-collector-for-jdk12-8c83e3d0309b">https://medium.com/@unmeshvjoshi/writing-your-own-garbage-collector-for-jdk12-8c83e3d0309b</a></p>
+<p>这篇文章可以算作上一篇文章的补充，重点介绍了Epsilon是如何和HotSpot系统打交道的，包括如何将新的垃圾收集器注册进入HotSpot，使其可以通过参数启用该垃圾收集器。也包括对象的接口、TLAB分配方法等周边功能的介绍。</p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/11/28/quickjs1-atom-hash/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">QuickJS中的atom设计</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/note/">note</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/react/">react</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%84%E8%AE%BA/">评论</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/design/" rel="tag">design</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/econ/" rel="tag">econ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/note/" rel="tag">note</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scheme/" rel="tag">scheme</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ukulele/" rel="tag">ukulele</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" rel="tag">经济学</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/12/13/openjdk-epsilon-gc/">OpenJDK中的Epsilon GC</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/28/quickjs1-atom-hash/">QuickJS中的atom设计</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/17/nand2tetris-1/">Nand2Tetris Part 1 课程总结</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/09/llvm-1/">学习LLVM第1篇：官方入门教程笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/02/quickjs/">6月7日在OSDT线上技术讨论会上的分享视频</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 <a target="_blank" rel="noopener" href="https://github.com/lhtin">tintin</a><br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
