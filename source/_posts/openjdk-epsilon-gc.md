@@ -8,7 +8,7 @@ tags:
 excerpt: 本文介绍OpenJDK中的Epsilon GC，包括内存分配方式、跟Runtime的对接。
 ---
 
-# OpenJDK中的Epsilon GC
+<!-- # OpenJDK中的Epsilon GC -->
 
 Epsilon GC实际上是no-op GC（即只进行内存分配，不进行内存回收）。本文用于介绍Epsilon GC的内存分配方式，以及GC是如何与HotSpot JVM的其他部分打交道的。
 
