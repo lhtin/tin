@@ -9,6 +9,8 @@ tags:
 excerpt: 本文介绍QuickJS源代码中的atom设计。
 ---
 
+原文地址：[https://tin.js.org/2020/11/28/quickjs1-atom-hash/](https://tin.js.org/2020/11/28/quickjs1-atom-hash/)
+
 QuickJS源码中的atom（32位无符号整数）可以认为是字符串（覆盖的范围包括JS中的关键字、标识符、Symbol等）的别名。其中最高位为1的atom代表的是整数，为0代表字符串，所以atom可以表示的整数和字符串个数都是(2^31)-1个。引入atom的目的是为了减少内存使用（重复的字符串只存储一次）和提高字符串比较速度（在转换成atom之后，只需要比较两个atom的数值是否一致）。
 
 其中内置了大概200多个常驻的atom（包括关键字、JS中常见的标识符、JS中内置的Symbol），在创建runtime的时候就被添加进去了，这些atom不会被清除。之后在解析JS代码过程中添加的atom，会根据引用计数进行清除。
