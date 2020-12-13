@@ -8,9 +8,11 @@ tags:
 excerpt: 本文介绍OpenJDK中的Epsilon GC，包括内存分配方式、跟Runtime的对接。
 ---
 
-Epsilon GC实际上是no-op GC（即只进行内存分配，不进行内存回收）。本文用于介绍Epsilon GC的内存分配方式，以及GC是如何与HotSpot JVM的其他部分打交道的。
+原文地址：[https://tin.js.org/2020/12/13/openjdk-epsilon-gc/](https://tin.js.org/2020/12/13/openjdk-epsilon-gc/)
 
-通过 [JEP 304: Garbage Collector Interface](https://openjdk.java.net/jeps/304) 提案，HotSpot为各个GC抽象出了一套统一的GC接口。这使得新GC可以像插件一样很轻松地添加到JVM中。添加时，除了自身的代码，对JVM中其他代码的改动非常小且很容易修改（改动的主要目的是为了让JVM能识别出新GC）。而后面添加到JVM中的Epsilon GC（[JEP 318](https://openjdk.java.net/jeps/318)）就是这个 JEP 304 提案的受益者，反过来也说明 JEP 304 提案实现的非常好。
+Epsilon GC实际上是一款no-op GC，即只进行内存分配，不进行内存回收。本文用于介绍Epsilon GC的内存分配方式，以及GC是如何与HotSpot JVM的其他部分打交道的。
+
+通过 [JEP 304: Garbage Collector Interface](https://openjdk.java.net/jeps/304) 提案，HotSpot为各个GC抽象出了一套统一的GC接口。这使得新GC可以像插件一样很轻松地添加到JVM中。添加新GC时，除了自身的代码，对JVM中其他代码的改动非常小且很容易修改（改动其他地方的主要目的是为了让JVM能识别出新GC）。而后面添加到JVM中的Epsilon GC（[JEP 318](https://openjdk.java.net/jeps/318)）就是这个 JEP 304 提案的受益者，反过来也说明 JEP 304 提案实现的效果不错。这其实也方便了像我这种JVM小白阅读JVM的源代码。
 
 每个GC都需要实现`GCArguments`、`CollectedHeap`等约定的接口。当运行JVM时，会通过参数和默认值选择本次要使用的GC，其实就是确定初始化哪个GC的`GCArguments`子类。比如通过参数`-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC`，就可以激活Epsilon GC，初始化`GCArguments`的子类`EpsilonArguments`。其中有一个`create_heap`方法必须实现：
 
@@ -52,7 +54,7 @@ public:
 
 ### `mem_allocate`
 
-功能：直接从堆内存分配，分配时需要加锁。这里有做优化，首先通过`_space->par_allocate(size)`分配，使用到了CAS解决多线程分配问题。如果空间不足，加锁扩充内存，然后再进行分配。
+功能：直接从堆内存分配，分配时需要加锁。这里有做优化，首先通过`_space->par_allocate(size)`分配，使用到了[CAS原子操作](https://en.wikipedia.org/wiki/Compare-and-swap)解决多线程分配问题。如果空间不足，再加锁扩充内存，然后再重新进行分配。
 
 ```c++
 HeapWord* EpsilonHeap::mem_allocate(size_t size, bool *gc_overhead_limit_was_exceeded) {
@@ -100,7 +102,7 @@ HeapWord* EpsilonHeap::allocate_work(size_t size) {
     {
       MutexLocker ml(Heap_lock);
 
-      /// 再尝试分配一次
+      /// 进入锁区域之后，再尝试分配一次
       res = _space->par_allocate(size);
       if (res != NULL) {
         break;
@@ -119,7 +121,7 @@ HeapWord* EpsilonHeap::allocate_work(size_t size) {
 
       _space->set_end((HeapWord *) _virtual_space.high());
     }
-    /// 移到了锁的外面，这里的分配可以并发
+    /// 移到了锁的外面，这里的分配可以并发进行了
     res = _space->par_allocate(size);
   }
   
@@ -268,10 +270,10 @@ EpsilonMonitoringSupport 监控相关
 
 ## 参考
 
-- Do It Yourself (OpenJDK) Garbage Collector: https://shipilev.net/jvm/diy-gc/
+- [Do It Yourself (OpenJDK) Garbage Collector](https://shipilev.net/jvm/diy-gc/)
 
   这篇文章介绍了如何给Epsilon GC添加垃圾回收功能，主要内容集中在垃圾回收代码上，本文没有涉及到这块。
 
-- Writing your own Garbage Collector for JDK12: https://medium.com/@unmeshvjoshi/writing-your-own-garbage-collector-for-jdk12-8c83e3d0309b
+- [Writing your own Garbage Collector for JDK12](https://medium.com/@unmeshvjoshi/writing-your-own-garbage-collector-for-jdk12-8c83e3d0309b)
 
   这篇文章可以算作上一篇文章的补充，重点介绍了Epsilon是如何和HotSpot系统打交道的，包括如何将新的垃圾收集器注册进入HotSpot，使其可以通过参数启用该垃圾收集器。也包括对象的接口、TLAB分配方法等周边功能的介绍。
