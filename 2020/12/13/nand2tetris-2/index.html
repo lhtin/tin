@@ -28,17 +28,19 @@
 
 
   
-  <title>目录: 评论 | 01的世界</title>
+  <title>Nand2Tetris Part 2 课程总结 | 01的世界</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="这里有关于计算机的方方面面">
-<meta property="og:type" content="website">
-<meta property="og:title" content="01的世界">
-<meta property="og:url" content="https://tintin.dev/categories/%E8%AF%84%E8%AE%BA/index.html">
+  <meta name="description" content="按：本文记录我在学习完Coursera上的 Nand2Tetris Part 2 课程之后的总结与思考。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nand2Tetris Part 2 课程总结">
+<meta property="og:url" content="https://tintin.dev/2020/12/13/nand2tetris-2/index.html">
 <meta property="og:site_name" content="01的世界">
-<meta property="og:description" content="这里有关于计算机的方方面面">
+<meta property="og:description" content="按：本文记录我在学习完Coursera上的 Nand2Tetris Part 2 课程之后的总结与思考。">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-13T07:46:22.701Z">
 <meta property="article:author" content="tintin">
-<meta property="article:tag" content="01的世界">
+<meta property="article:tag" content="nand2tetris">
 <meta name="twitter:card" content="summary">
   
   
@@ -89,41 +91,65 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
+        <section id="main"><article id="post-nand2tetris-2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
     
     
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2017/10/17/prize-in-economics-2017/" class="archive-article-date">
-  <time class="dt-published" datetime="2017-10-16T16:00:00.000Z" itemprop="datePublished">10月 17</time>
-</a>
-      
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/17/prize-in-economics-2017/">2017年诺贝尔经济学奖</a>
+    <h1 class="p-name article-title article-title-tin" itemprop="headline name">
+      Nand2Tetris Part 2 课程总结
     </h1>
   
-  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2017-10-16T16:00:00.000Z" itemprop="datePublished">2017-10-17</time></p>
+  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2020-12-12T16:00:00.000Z" itemprop="datePublished">2020-12-13</time></p>
 
 
-    </header>
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>距上次完成 <a target="_blank" rel="noopener" href="https://tin.js.org/2020/07/17/nand2tetris-1/">Nand2Tetris Part 1</a> 课程4个多月之后，最近终于把 <a target="_blank" rel="noopener" href="https://www.coursera.org/learn/nand2tetris2">Part 2</a> 也完成了，拿到证书。这次就没有上次那么顺利了，完成整个课程的6个项目的时间跨度为4个多月，而花在项目上面的时间肯定比课程1多得多。</p>
+<p>其中Project9是启动最晚，耗时最长的项目。该项目我计划是实现一个俄罗斯方块，并且尽可能遵守 2009 Tetris Design Guideline。我分成两个步骤来完成，首先使用JS实现这个游戏，然后在使用Jack照着相同的逻辑实现一边。在使用JS开始发，将渲染部分做的尽可能独立，这样在迁移的时候，其他逻辑基本可以等价的转化，而渲染和按键部分基本上都进行重写。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/lhtin/nand-2-tetris-labs">这里</a>可以看到我完成的答案。</p>
+<p>每个Project完成情况如下：</p>
+<ul>
+<li>7-21 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project07">Project7</a></li>
+<li>7-24 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project08">Project8</a></li>
+<li>11-25 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project09">Project9</a></li>
+<li>8-16 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project10">Project10</a></li>
+<li>8-22 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project11">Project11</a></li>
+<li>11-16 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project12">Project12</a></li>
+</ul>
+<p>课程 Part 2 的侧重点是编译器和操作系统。首先引入了基于栈的字节码语言（VM Language），通过编写Translator，将其转化为 Part 1 中的机器码。然后引入类似Java的面向对象高级语言Jack，通过编写Compiler，将其编译为字节码，然后再通过Translator，转化为最终的机器码。此外，提供了一个及其简陋的OS API，提供基本的Memory、String、Screen、Keyboard、Math、Array等接口共应用程序调用。</p>
+<h3 id="项目总结"><a href="#项目总结" class="headerlink" title="项目总结"></a>项目总结</h3><p>Project7、8分两步，实现一个字节码语言（VM Language）到机器码（Assembly）的转化器。其中字节码语言类似Java中的Bytecode，是一种基于栈的High Level IR。</p>
+<p>Project9首先介绍了Jack语言，它是一种面向对象高级编程语言，跟Java语言非常类似。然后让同学们使用该语言编写一个应用程序供其他同学进行评审以获得分数。根据我实际使用的情况，虽然Jack和Java类似，但是语法和库相比Java还是极其有限，对开发者并不友好。只能当作一个玩具语言进行学习。</p>
+<p>Project10、11分两步，实现Jack语言到字节码语言的翻译。涉及到此法解析、语法解析、符号处理和字节码生产等，每一块的内容都非常的简单，但是需要完整做完才能够通过测试，还是非常的有意义。</p>
+<p>Project12的目的是实现Jack中的操作系统提供的库，包括内存分配和释放、键盘事件监听、字符和图案输出到屏幕等功能。比较有挑战。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/12/13/openjdk-epsilon-gc/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">OpenJDK中的Epsilon GC</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 
 
 </section>
