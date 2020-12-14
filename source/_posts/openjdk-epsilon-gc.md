@@ -17,16 +17,19 @@ Epsilon GC实际上是一款no-op GC，即只进行内存分配，不进行内�
 每个GC都需要实现`GCArguments`、`CollectedHeap`等约定的接口。当运行JVM时，会通过参数和默认值选择本次要使用的GC，其实就是确定初始化哪个GC的`GCArguments`子类。比如通过参数`-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC`，就可以激活Epsilon GC，初始化`GCArguments`的子类`EpsilonArguments`。其中有一个`create_heap`方法必须实现：
 
 ```c++
+/* src/hotspot/share/gc/shared/gcArguments.hpp */
 class GCArguments {
 public:
   virtual CollectedHeap* create_heap() = 0;
 }
 
+/* src/hotspot/share/gc/epsilon/epsilonArguments.hpp */
 class EpsilonArguments : public GCArguments {
 private:
   virtual CollectedHeap* create_heap();
 }
 
+/* src/hotspot/share/gc/epsilon/epsilonArguments.cpp */
 CollectedHeap* EpsilonArguments::create_heap() {
   return new EpsilonHeap();
 }
@@ -35,6 +38,7 @@ CollectedHeap* EpsilonArguments::create_heap() {
 `create_heap`方法返回`CollectedHeap`子类实例，这个类是内存管理的核心类，要求子类必须实现统一的内存分配和回收接口：
 
 ```c++
+/* src/hotspot/share/gc/epsilon/epsilonHeap.hpp */
 class CollectedHeap : public CHeapObj<mtInternal> {
 public:
   virtual HeapWord* mem_allocate(size_t size,
@@ -57,6 +61,7 @@ public:
 功能：直接从堆内存分配，分配时需要加锁。这里有做优化，首先通过`_space->par_allocate(size)`分配，使用到了[CAS原子操作](https://en.wikipedia.org/wiki/Compare-and-swap)解决多线程分配问题。如果空间不足，再加锁扩充内存，然后再重新进行分配。
 
 ```c++
+/* src/hotspot/share/gc/epsilon/epsilonHeap.cpp */
 HeapWord* EpsilonHeap::mem_allocate(size_t size, bool *gc_overhead_limit_was_exceeded) {
   *gc_overhead_limit_was_exceeded = false;
   return allocate_work(size);
@@ -89,8 +94,8 @@ HeapWord* EpsilonHeap::allocate_work(size_t size) {
 
 这里的分配我觉得可以再优化下：
 
-1. 进入锁的区域后，再尝试分配一次，因为有可能已经有空间了，可以减少堆空间的分配
-2. 将`res = _space->par_allocate(size)`移出锁的区域，可以减少锁的阻塞时间
+1. 进入锁的区域后，再尝试分配一次，因为有可能已经有空间了，可以减缓堆空间的分配
+2. 将`res = _space->par_allocate(size)`移到锁的区域外面，可以减少锁的阻塞时间
 
 优化后的代码如下：
 
@@ -138,6 +143,7 @@ HeapWord* EpsilonHeap::allocate_work(size_t size) {
 JVM会调用GC提供的该方法获得TLAB块，然后在分配内存时，通过简单的指针移动进行快速的内存分配。
 
 ```c++
+/* src/hotspot/share/gc/epsilon/epsilonHeap.cpp */
 HeapWord* EpsilonHeap::allocate_new_tlab(size_t min_size,
                                          size_t requested_size,
                                          size_t* actual_size) {
@@ -193,12 +199,14 @@ HeapWord* EpsilonHeap::allocate_new_tlab(size_t min_size,
 其中，存储跟线程绑定的数据（`EpsilonThreadLocalData`）是在`EpsilonBarrierSet`类中初始化的。利用Runtime提供的`on_thread_create`和`on_thread_destroy`方法进行创建和销毁：
 
 ```c++
+/* src/hotspot/share/gc/epsilon/epsilonBarrierSet.hpp */
 class EpsilonBarrierSet: public BarrierSet {
 public:
   virtual void on_thread_create(Thread* thread);
   virtual void on_thread_destroy(Thread* thread);
 };
 
+/* src/hotspot/share/gc/epsilon/epsilonBarrierSet.cpp */
 void EpsilonBarrierSet::on_thread_create(Thread *thread) {
   EpsilonThreadLocalData::create(thread);
 }
@@ -206,7 +214,44 @@ void EpsilonBarrierSet::on_thread_create(Thread *thread) {
 void EpsilonBarrierSet::on_thread_destroy(Thread *thread) {
   EpsilonThreadLocalData::destroy(thread);
 }
+
+/* src/hotspot/share/gc/epsilon/epsilonThreadLocalData.hpp */
+class EpsilonThreadLocalData {
+private:
+  size_t _ergo_tlab_size;
+  int64_t _last_tlab_time;
+  static EpsilonThreadLocalData* data(Thread* thread) {
+    return thread->gc_data<EpsilonThreadLocalData>();
+  }
+
+public:
+  static void create(Thread* thread) {
+    /// placement new。在new EpsilonThreadLocalData()分配在`data(thread)`返回的内存处
+    new (data(thread)) EpsilonThreadLocalData();
+  }
+
+  static void destroy(Thread* thread) {
+    data(thread)->~EpsilonThreadLocalData();
+  }
+
+  static size_t ergo_tlab_size(Thread *thread) {
+    return data(thread)->_ergo_tlab_size;
+  }
+
+  static int64_t last_tlab_time(Thread *thread) {
+    return data(thread)->_last_tlab_time;
+  }
+
+  static void set_ergo_tlab_size(Thread *thread, size_t val) {
+    data(thread)->_ergo_tlab_size = val;
+  }
+
+  static void set_last_tlab_time(Thread *thread, int64_t time) {
+    data(thread)->_last_tlab_time = time;
+  }
 ```
+
+上面`EpsilonThreadLocalData::create`静态方法中的 C++ new 语法我之前没有见过，查资料知道它叫 [Placement new](https://en.wikipedia.org/wiki/Placement_syntax) 语法。作用是将创建的对象存储在指定的分配好的内存中，不需要先调用内存接口分配所需内存。这里指定的内存就是`thread->gc_data<EpsilonThreadLocalData>()`了，实际上是`thread`对象的一个字段`GCThreadLocalData _gc_data`，大小为152字节，只要自定义的`GCThreadLocalData`不超过这个大小就可以，内容完全由GC自己决定。
 
 
 
@@ -215,6 +260,7 @@ void EpsilonBarrierSet::on_thread_destroy(Thread *thread) {
 功能：这两个方法用于进行垃圾回收。因为Epsilon GC的定位就是只分配内存，不回收，所以并不会做啥具体的事情。
 
 ```c++
+/* src/hotspot/share/gc/epsilon/epsilonHeap.cpp */
 void EpsilonHeap::collect(GCCause::Cause cause) {
   switch (cause) {
     case GCCause::_metadata_GC_threshold:
