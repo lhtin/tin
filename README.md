@@ -1,5 +1,23 @@
 ## Todo List
 
+### 计划文章列表
+
+- QuickJS中的垃圾回收
+- QuickJS中的字节码优化技术
+- QuickJS中的闭包
+
+- 给OpenJDK中的Epsilon GC添加垃圾回收功能
+- OpenJDK中的Serial GC
+- OpenJDK中的Parallel GC
+- OpenJDK中的G1 GC
+- OpenJDK中的Shenandoah GC
+- OpenJDK中的ZGC
+- OpenJDK中的字节码解释器
+- OpenJDK中的C1即时编译器
+- OpenJDK中的C2即时编译器
+- OpenJDK中的Java标准库
+- OpenJDK中的Runtime
+
 最近计划：
 - 完成Nand2Tetris Part 2课程，并写一篇课程总结
 - 用React写一个静态博客生成器，并用于自己的博客
