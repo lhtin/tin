@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2cdbc7958f6df4fec3751794de6e9c63";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-2');
+  </script>
+
+
+
+  
+  <title>Nand2Tetris Part 2 课程总结 | 01的世界</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="按：本文记录我在学习完Coursera上的 Nand2Tetris Part 2 课程之后的总结与思考。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nand2Tetris Part 2 课程总结">
+<meta property="og:url" content="https://tintin.dev/2020/12/21/nand2tetris-2/index.html">
+<meta property="og:site_name" content="01的世界">
+<meta property="og:description" content="按：本文记录我在学习完Coursera上的 Nand2Tetris Part 2 课程之后的总结与思考。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tintin.dev/assets/nand2tetris/hack-ram.png">
+<meta property="og:image" content="https://tintin.dev/assets/nand2tetris/demo.png">
+<meta property="article:published_time" content="2020-12-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-21T05:29:57.871Z">
+<meta property="article:author" content="tintin">
+<meta property="article:tag" content="nand2tetris">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tintin.dev/assets/nand2tetris/hack-ram.png">
+  
+  
+    <link rel="icon" type="image/x-icon" href="/images/logo.jpg">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <span id="logo">01的世界</span>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://tintin.dev"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-nand2tetris-2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title article-title-tin" itemprop="headline name">
+      Nand2Tetris Part 2 课程总结
+    </h1>
+  
+  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2020-12-20T16:00:00.000Z" itemprop="datePublished">2020-12-21</time></p>
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>距上次完成 <a target="_blank" rel="noopener" href="https://tin.js.org/2020/07/17/nand2tetris-1/">Nand2Tetris Part 1</a> 课程4个多月之后，最近终于把 <a target="_blank" rel="noopener" href="https://www.coursera.org/learn/nand2tetris2">Part 2</a> 也完成了，拿到证书。这次就没有上次那么顺利了，完成整个课程的6个项目的时间跨度为4个多月，而花在项目上面的时间肯定比课程1多得多。</p>
+<p>其中Project9是启动最晚，耗时最长的项目。该项目我计划是实现一个俄罗斯方块，并且尽可能遵守 2009 Tetris Design Guideline。我分成两个步骤来完成，首先使用JS实现这个游戏，然后在使用Jack照着相同的逻辑实现一边。在使用JS开始发，将渲染部分做的尽可能独立，这样在迁移的时候，其他逻辑基本可以等价的转化，而渲染和按键部分基本上都进行重写。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/lhtin/nand-2-tetris-labs">这里</a>可以看到我完成的答案。</p>
+<p>每个Project完成情况如下：</p>
+<ul>
+<li>7-21 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project07">Project7</a></li>
+<li>7-24 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project08">Project8</a></li>
+<li>11-25 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project09">Project9</a></li>
+<li>8-16 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project10">Project10</a></li>
+<li>8-22 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project11">Project11</a></li>
+<li>11-16 完成 <a target="_blank" rel="noopener" href="https://www.nand2tetris.org/project12">Project12</a></li>
+</ul>
+<p>课程 Part 2 的侧重点是编译器和操作系统。首先引入了基于栈的字节码语言（VM Language），通过编写Translator，将其转化为 Part 1 中的机器码。然后引入类似Java的面向对象高级语言Jack，通过编写Compiler，将其编译为字节码，然后再通过Translator，转化为最终的机器码。此外，提供了一个及其简陋的OS API，提供基本的Memory、String、Screen、Keyboard、Math、Array等接口共应用程序调用。</p>
+<h3 id="项目总结"><a href="#项目总结" class="headerlink" title="项目总结"></a>项目总结</h3><h4 id="Project7、8"><a href="#Project7、8" class="headerlink" title="Project7、8"></a>Project7、8</h4><p>Project7、8分两步，实现一个VM语言（VM Language）到汇编语言（Hack Assembly Code，Project6实现了一个汇编语言到机器语言的汇编器）的转化器。其中字节码语言类似Java中的Bytecode，是一种基于栈的High Level IR。通过实现不同平台的VM，字节码可以在不修改的情况下在各个平台上执行，实现跨平台能力。</p>
+<p>本项目实现的VM是堆栈机VM，数据使用一个后进先出的栈来存储，不同指令根据功能进行出栈入栈。Hack中的VM语言指令可以分成4类，分别是算术运算指令、内存操作指令、程序流程控制指令和函数调用指令。Project7实现前两类指令，Project8实现剩下的两类指令。</p>
+<p>先来看下使用VM语言编写的斐波那契函数的大概样子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 定义</span><br><span class="line">function fibonacci 0</span><br><span class="line">  push argument 0</span><br><span class="line">  push constant 1</span><br><span class="line">  eq</span><br><span class="line">  if goto RETURN_ONE</span><br><span class="line">  push argument 0</span><br><span class="line">  push constant 1</span><br><span class="line">  sub</span><br><span class="line">  call fibonacci 1</span><br><span class="line">  push argument 0</span><br><span class="line">  push constant 2</span><br><span class="line">  sub</span><br><span class="line">  call fibonacci 1</span><br><span class="line">  add</span><br><span class="line">  return</span><br><span class="line">label RETURN_ONE</span><br><span class="line">  push constant 1</span><br><span class="line">  return</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 调用 fibonacci(8)</span><br><span class="line">push constant 8</span><br><span class="line">call fibonacci 1</span><br></pre></td></tr></table></figure>
+
+<p>下面按照指令类型分成4类，讲解各个指令的详细函数。</p>
+<p>算术运算类指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">add     将栈顶两个整数出栈后相加，并将结果入栈</span><br><span class="line">sub     将栈顶两个整数出栈后相减，并将结果入栈</span><br><span class="line">neg     将栈顶的整数出栈后取负，并将结果入栈</span><br><span class="line">eq      将栈顶两个整数出栈后进行相等比较，并将比较结果入栈</span><br><span class="line">gt      将栈顶两个整数出栈后进行大于比较，并将比较结果入栈</span><br><span class="line">lt      将栈顶两个整数出栈后进行小于比较，并将比较结果入栈</span><br><span class="line">and     将栈顶两个元素出栈后进行按位与运算，并将结果入栈</span><br><span class="line">or      将栈顶两个元素出栈后进行按位或运算，并将结果入栈</span><br><span class="line">not     将栈顶的元素出栈后进行按位取反运算，并将结果入栈</span><br></pre></td></tr></table></figure>
+
+<p>内存操作类指令（需要结合下面的Hack内存布局图来理解）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">push segment index  将segment的第index个位置的内容push到栈顶</span><br><span class="line">pop  segment index   将栈顶元素pop到segment的第index个位置</span><br><span class="line"></span><br><span class="line">segment可选: </span><br><span class="line">- argument      函数参数</span><br><span class="line">- local         函数局部变量</span><br><span class="line">- this          对象实例字段</span><br><span class="line">- that          数组实例</span><br><span class="line">- pointer       用于修改THIS和THAT中的内容，0表示操作THIS，1表示操作THAT。</span><br><span class="line">                注意只是为了方便给编译器用，因为对象和数组实例的内存地址来自Heap，</span><br><span class="line">                没有规律，所以需要给编译器一个修改THIS和THAT的方式。</span><br><span class="line">                而像ARG、LCL则不需要，因为转化器在生成函数调用时，就可以知道ARG</span><br><span class="line">                和LCL的位置，自己进行设置就可以，不需要暴露给编译器去设置。</span><br><span class="line">- static        全局变量，开始地址固定为16</span><br><span class="line">- temp          临时变量，开始地址固定为5，给编译器内部使用</span><br><span class="line">- constant      常量，表示将常量push到栈顶，没有pop操作</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/nand2tetris/hack-ram.png"></p>
+<p>程序流程控制类指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">label   symbol      引入一个标签，供goto、if-goto语句使用</span><br><span class="line">goto    symbol      无条件跳转</span><br><span class="line">if-goto symbol      如果栈顶元素为true则跳转</span><br></pre></td></tr></table></figure>
+
+<p>函数调用类指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function functionName nLocals   函数声明，nLocals用于表面函数本地变量的个数</span><br><span class="line">call     functionName nArgs     调用函数，nArgs用于设置被调函数的参数位置</span><br><span class="line">return                          函数返回</span><br></pre></td></tr></table></figure>
+
+<h4 id="Project9"><a href="#Project9" class="headerlink" title="Project9"></a>Project9</h4><p>Project9首先介绍了Jack高级编程语言，它是一种面向对象高级编程语言，跟Java语言非常类似。然后让同学们使用该语言编写一个应用程序供其他同学进行评审以获得分数。根据我实际使用的情况，虽然Jack和Java类似，但是语法和库相比Java还是极其有限，对开发者非常不友好，当作一个玩具语言就好。</p>
+<p>Jack语言介绍：</p>
+<ul>
+<li>主要语法（示例）<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">class Main &#123;</span><br><span class="line">  field int data;</span><br><span class="line">  field Main next;</span><br><span class="line">  constructor Main new(int _data, Main _next) &#123;</span><br><span class="line">    let data &#x3D; _data;</span><br><span class="line">    let next &#x3D; _next;</span><br><span class="line">    return this;</span><br><span class="line">  &#125;</span><br><span class="line">  method void dispose() &#123;</span><br><span class="line">    if (~(next &#x3D; null)) &#123;</span><br><span class="line">      do next.dispose();</span><br><span class="line">    &#125;</span><br><span class="line">    do Memory.deAlloc(this);</span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line">  method void print(boolean isFirst) &#123;</span><br><span class="line">    if (isFirst) &#123;</span><br><span class="line">      do Output.printString(&quot;[&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    do Output.printInt(data);</span><br><span class="line">    if (next &#x3D; null) &#123;</span><br><span class="line">      do Output.printString(&quot;]&quot;);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      do Output.printString(&quot;, &quot;);</span><br><span class="line">      do next.print(false);</span><br><span class="line">    &#125;</span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  function int fibonacci(int n) &#123;</span><br><span class="line">    var int fm_1;</span><br><span class="line">    var int m, fm;</span><br><span class="line">    var int ft;</span><br><span class="line"></span><br><span class="line">    if ((n &#x3D; 0) | (n &#x3D; 1)) &#123;</span><br><span class="line">      return n;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    let fm_1 &#x3D; 0;</span><br><span class="line">    let m &#x3D; 1;</span><br><span class="line">    let fm &#x3D; 1;</span><br><span class="line"></span><br><span class="line">    while (m &lt; n) &#123;</span><br><span class="line">      let ft &#x3D; fm_1 + fm;</span><br><span class="line">      let fm_1 &#x3D; fm;</span><br><span class="line">      let fm &#x3D; ft;</span><br><span class="line">      let m &#x3D; m + 1;</span><br><span class="line">    &#125;</span><br><span class="line">    return fm;</span><br><span class="line">  &#125;</span><br><span class="line">  function void main() &#123;</span><br><span class="line">    var Main m;</span><br><span class="line"></span><br><span class="line">    do Output.printString(&quot;Hello World&quot;);</span><br><span class="line">    do Output.println();</span><br><span class="line"></span><br><span class="line">    do Output.printString(&quot;Fibonacci 8: &quot;);</span><br><span class="line">    do Output.printInt(Main.fibonacci(8));</span><br><span class="line">    do Output.println();</span><br><span class="line"></span><br><span class="line">    let m &#x3D; Main.new(1, null);</span><br><span class="line">    let m &#x3D; Main.new(2, m);</span><br><span class="line">    let m &#x3D; Main.new(3, m);</span><br><span class="line">    let m &#x3D; Main.new(4, m);</span><br><span class="line">    let m &#x3D; Main.new(5, m);</span><br><span class="line">    do m.print(true);</span><br><span class="line">    do Output.println();</span><br><span class="line"></span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+执行结果：<br><img src="/assets/nand2tetris/demo.png" alt="demo"></li>
+<li>面向对象。每个class一个文件，class name即为文件名称</li>
+<li>变量：<ul>
+<li>静态变量（static），所有实例共享</li>
+<li>实例变量（field）</li>
+<li>函数参数变量</li>
+<li>函数局部变量</li>
+</ul>
+</li>
+<li>函数<ul>
+<li>构造函数 <code>constructor ClassName funName(...)</code></li>
+<li>静态方法 <code>function type funName(...)</code></li>
+<li>实例方法 <code>method type funName(...)</code></li>
+</ul>
+</li>
+<li>数据类型<ul>
+<li>原生类型：int（整数）、boolean（布尔）、char（字符），都占2字节</li>
+<li>内置对象类型：<ul>
+<li>数组：支持<code>arr[i]</code>获取和修改</li>
+<li>字符串：支持<code>&quot;Hello World!&quot;</code>语法</li>
+</ul>
+</li>
+<li>自定义对象类型：class name</li>
+<li>类型转换：<ul>
+<li>char与int按需互转<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var char c;</span><br><span class="line">let c &#x3D; 33; &#x2F;&#x2F; &#39;A&#39;（ascii）</span><br></pre></td></tr></table></figure></li>
+<li>可以将整数赋值给引用类型的变量<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var Array a;</span><br><span class="line">let a &#x3D; 5000;</span><br><span class="line">let a[100] &#x3D; 77; &#x2F;&#x2F; 将内存地址5100处设置为77</span><br></pre></td></tr></table></figure></li>
+<li>数组变量与对象实例变量可以互相转换<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">var Complex c; </span><br><span class="line">var Array a;</span><br><span class="line">let a &#x3D; Array.new(2);</span><br><span class="line">let a[0] &#x3D; 7;</span><br><span class="line">let a[1] &#x3D; 8;</span><br><span class="line">let c &#x3D; a; &#x2F;&#x2F; 等价于 Complex(7, 8)</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>我给Project9做的应用是<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Tetris">俄罗斯方块游戏</a>，刚好呼应课程的题目😂。并且我做的有一个特点，就是尽量按照现代的俄罗斯方块规则来做，我选择的俄罗斯标准是<a target="_blank" rel="noopener" href="https://tetris.wiki/Tetris_Guideline"><em>2009 Tetris Design Guideline</em></a>，完整支持SRS旋转系统（Super Rotation System）。做的时候，我是先用JS写了一个比较完整的版本，并且在写的时候将渲染部分做的比较独立，方便后面翻译为Jack语言时对其他部分的逻辑改动较小。做完JS版本之后，再通过人工将JS版本中的逻辑翻译为Jack版本。</p>
+<p>编写过程遇到的一些问题：</p>
+<ul>
+<li>内存溢出问题<ul>
+<li>在使用Jack编写程序时，最容易遇到的问题就是内存溢出问题。包括栈内存、堆内存，甚至静态数据区也有可能。</li>
+<li>栈内存比较常出现的方式是无线调用。在第一版的代码中，每个游戏状态是一个函数，状态变化会导致函数调用。几个回合下来就导致了栈溢出。通过改为while循环，解决了这个问题</li>
+<li>堆内存比较常见的问题是内存泄漏。我遇到最多的是字符串未释放的问题，在调用完<code>Output.printString</code>之后，还需要释放掉字符串，比较繁琐。于是我封装了一个<code>MyOutput.printString</code>，进行字符串的释放。</li>
+</ul>
+</li>
+<li>多任务之间同步阻塞问题<ul>
+<li>在俄罗斯方块游戏中，有一个逻辑是同时有一个计时器在计数，另外又有一个键盘监听器在监听键盘按键。困难是在Jack中，计时器是同步操作，你没法在计时1秒的的中间处理键盘按键事件。所以这里实际上是需要你自己在代码层面，实现一个多任务交替执行的效果。我设计的方式是将一个1秒的计时器拆分成1000个1毫秒的计时器，然后在相邻计时器之间插入当前键盘按键的判断，如果按下的键需要处理，就调用相应逻辑进行处理，处理完之后根据情况决定是否需要取消剩余未执行完的计时器。</li>
+<li>其实这有点像是实现了一个协程逻辑，难点在于各任务之间的执行粒度是怎样子的。</li>
+<li>又想了一下，如果要给VM实现多线程版本，该如何实现呢？比如说假设有几个main函数，就当作几个线程来执行。这时，SP、LCL、ARG、THIS、THAT、temp、下一个指令位置这些跟线程相关的数据都需要在切换线程的时候进行存储和恢复了。stack需要按线程进行分配，每个线程的stack起始地址不一样。然后还需要一个主程序来调度和管理这些线程的执行和结束。其中如何让线程暂停执行是一个问题，是通过插入代码到应用程序中让其主动让出CPU还是有更灵活的方式，毕竟管理线程的主程序也只是一个应用程序而已？</li>
+</ul>
+</li>
+</ul>
+<h4 id="Project10、11"><a href="#Project10、11" class="headerlink" title="Project10、11"></a>Project10、11</h4><p>Project10、11分两步，实现Jack高级编程语言到VM语言（字节码）的翻译。涉及到词法解析、语法解析（因为语法经过特殊设计，解析起来非常的简单）、符号处理和字节码生产等。每一块的内容都非常的简单，但是需要完整做完才能够通过测试，还是非常的有意义。</p>
+<p>Jack语言BNF描述：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">Class           -&gt; &#39;class&#39; ClassName &#39;&#123;&#39; ClassVarDec* SubroutineDec* &#39;&#125;&#39;</span><br><span class="line">ClassVarDec     -&gt; (&#39;static&#39; | &#39;field&#39;) Type VarName (&#39;,&#39; VarName)* &#39;;&#39;</span><br><span class="line">Type            -&gt; &#39;int&#39; | &#39;char&#39; | &#39;boolean&#39; | ClassName</span><br><span class="line">SubroutineDec   -&gt; (&#39;constructor&#39; | &#39;function&#39; | &#39;method&#39;) </span><br><span class="line">                   (&#39;void&#39; | Type) SubroutineName &#39;(&#39; ParameterList &#39;)&#39; </span><br><span class="line">                   SubroutineBody</span><br><span class="line">ParameterList   -&gt; ((Type VarName) (&#39;,&#39; Type VarName)*)?</span><br><span class="line">SubroutineBody  -&gt; &#39;&#123;&#39; VarDec* Statements &#39;&#125;&#39;</span><br><span class="line">VarDec          -&gt; &#39;var&#39; Type VarName (&#39;,&#39; VarName)* &#39;;&#39;</span><br><span class="line">ClassName       -&gt; Identifier</span><br><span class="line">SubroutineName  -&gt; Identifier</span><br><span class="line">VarName         -&gt; Identifier</span><br><span class="line"></span><br><span class="line">Statements      -&gt; Statement*</span><br><span class="line">Statement       -&gt; LetStatement | IfStatement | WhileStatement </span><br><span class="line">                |  DoStatement | ReturnStatement</span><br><span class="line">LetStatement    -&gt; &#39;let&#39; VarName (&#39;[&#39; Expression &#39;]&#39;)? &#39;&#x3D;&#39; Expression &#39;;&#39;</span><br><span class="line">IfStatement     -&gt; &#39;if&#39; &#39;(&#39; Expression &#39;)&#39; &#39;&#123;&#39; Statements &#39;&#125;&#39; </span><br><span class="line">                   (&#39;else&#39; &#39;&#123;&#39; Statements &#39;&#125;&#39;)?</span><br><span class="line">WhileStatement  -&gt; &#39;while&#39; &#39;(&#39; Expression &#39;)&#39; &#39;&#123;&#39; Statements &#39;&#125;&#39;</span><br><span class="line">DoStatement     -&gt; &#39;do&#39; SubroutineCall &#39;;&#39;</span><br><span class="line">ReturnStatement -&gt; &#39;return&#39; Expression? &#39;;&#39;</span><br><span class="line"></span><br><span class="line">Expression      -&gt; Term (Op Term)*</span><br><span class="line">Term            -&gt; IntegerConstant | StringConstant | KeywordConstant </span><br><span class="line">                |  VarName | VarName &#39;[&#39; Expression &#39;]&#39; | SubroutineCall </span><br><span class="line">                |  &#39;(&#39; Expression &#39;)&#39; | UnaryOp Term</span><br><span class="line">SubroutineCall  -&gt; SubroutineName &#39;(&#39; ExpressionList &#39;)&#39; </span><br><span class="line">                |  (ClassName | VarName) &#39;.&#39; SubroutineName &#39;(&#39; ExpressionList &#39;)&#39;</span><br><span class="line">ExpressionList  -&gt; (Expression (&#39;,&#39; Expression)*)?</span><br><span class="line">Op              -&gt; &#39;+&#39; | &#39;-&#39; | &#39;*&#39; | &#39;&#x2F;&#39; | &#39;&amp;&#39; | &#39;|&#39; | &#39;&lt;&#39; | &#39;&gt;&#39; | &#39;&#x3D;&#39;</span><br><span class="line">UnaryOp         -&gt; &#39;-&#39; | &#39;~&#39;</span><br><span class="line">KeywordConstant -&gt; &#39;true&#39; | &#39;false&#39; | &#39;null&#39; | &#39;this&#39;</span><br><span class="line"></span><br><span class="line">Identifier      -&gt; [a-zA-Z_] [a-zA-Z0-9_]*</span><br><span class="line">IntegerConstant -&gt; 0 ... 32767</span><br><span class="line">StringConstant  -&gt; &#39;&quot;&#39; [^&quot;\n]* &#39;&quot;&#39;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Project12"><a href="#Project12" class="headerlink" title="Project12"></a>Project12</h4><p>Project12的目的是实现Jack中的操作系统提供的库，包括内存分配和释放、键盘事件监听、字符和图案输出到屏幕等功能。比较有挑战。</p>
+<p>Jack系统标准库（部分接口会补充实现的难点说明，其中<code>init</code>为内部接口不对外使用）：</p>
+<ul>
+<li>Math<ul>
+<li><code>function void init()</code></li>
+<li><code>function int abs(int x)</code> 取绝对值</li>
+<li><code>function int multiply(int x, int y)</code> 相乘<ul>
+<li>实现的重点是算法的选择，复杂度跟y的大小成正比的比较差，跟y的位数成正比的比较好</li>
+</ul>
+</li>
+<li><code>function int divide(int x, int y)</code> 相除</li>
+<li><code>function int min(int x, int y)</code> 最小值</li>
+<li><code>function int max(int x, int y)</code> 最大值</li>
+<li><code>function int sqrt(int x)</code> 平方根</li>
+</ul>
+</li>
+<li>String<ul>
+<li><code>constructor String new(int maxLength)</code> 初始化一个存放可以存放maxLength个字符的字符串对象<ul>
+<li>使用的时候注意用完记得释放，不然容易造成堆内存溢出问题</li>
+</ul>
+</li>
+<li><code>method void dispose()</code></li>
+<li><code>method int length()</code> 返回有效字符串长度</li>
+<li><code>method char charAt(int j)</code> 返回第n个字符</li>
+<li><code>method void setCharAt(int j, char c)</code> 设置第n个字符</li>
+<li><code>method String appendChar(char c)</code> 添加字符到字符串后面</li>
+<li><code>method void eraseLastChar()</code> 移除最后一个字符</li>
+<li><code>method int intValue()</code> 将字符串转换为整数</li>
+<li><code>method void setInt(int j)</code> 将整数转化为字符串</li>
+<li><code>function char backSpace()</code> 返回backspace字符</li>
+<li><code>function char doubleQuote()</code> 返回双引号字符</li>
+<li><code>function char newLine()</code> 返回换行符</li>
+</ul>
+</li>
+<li>Array<ul>
+<li><code>function Array new(int size)</code></li>
+<li><code>method void dispose()</code></li>
+</ul>
+</li>
+<li>Output<ul>
+<li><code>function void init()</code></li>
+<li><code>function void moveCursor(int i, int j)</code> 移动光标位置（0 &lt;= i &lt;= 511，0 &lt;= j &lt;= 255）</li>
+<li><code>function void printChar(char c)</code></li>
+<li><code>function void printString(String s)</code></li>
+<li><code>function void printInt(int i)</code></li>
+<li><code>function void println()</code></li>
+<li><code>function void backSpace()</code> 删除屏幕上的最后一个字符</li>
+</ul>
+</li>
+<li>Screen<ul>
+<li><code>function void init()</code></li>
+<li><code>function void clearScreen()</code> 清除屏幕内容</li>
+<li><code>function void setColor(boolean b)</code> 设置接下来画图的颜色</li>
+<li><code>function void drawPixel(int x, int y)</code> 画一个点</li>
+<li><code>function void drawLine(int x1, int y1, int x2, int y2)</code> 画一条线</li>
+<li><code>function void drawRectangle(int x1, int y1, int x2, int y2)</code> 画一个矩形</li>
+<li><code>function void drawCircle(int x, int y, int r)</code> 画一个圆</li>
+</ul>
+</li>
+<li>Keyboard<ul>
+<li><code>function void init()</code></li>
+<li><code>function char keyPressed()</code> 当前按下的键</li>
+<li><code>function char readChar()</code> 读取一个字符</li>
+<li><code>function String readLine()</code> 读取一行字符</li>
+<li><code>function int readInt()</code> 读取一行字符并转化为整数</li>
+</ul>
+</li>
+<li>Memory<ul>
+<li><code>function void init()</code></li>
+<li><code>function int peek(int address)</code> 返回指定内存地址的内容</li>
+<li><code>function void poke(int address, int value)</code> 设置指定内存地址的内容</li>
+<li><code>function Array alloc(int size)</code> 从堆中分配size大小的内存<ul>
+<li>内存管理的方式有很多种，有的比较简单，有的含有碎片整理功能</li>
+</ul>
+</li>
+<li><code>function void deAlloc(Array o)</code> 释放o对象占用的内存</li>
+</ul>
+</li>
+<li>Sys<ul>
+<li><code>function void init()</code></li>
+<li><code>function void halt()</code> 停机</li>
+<li><code>function void error(int errorCode)</code> 向屏幕输出错误</li>
+<li><code>function void wait(int duration)</code> 同步等待duration毫秒<ul>
+<li>注意是同步阻塞。如果需要在wait的时候做其他事情，需要将wait的时间拆小，在每一个时间片段中途做点事情</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/12/13/openjdk-epsilon-gc/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">OpenJDK中的Epsilon GC</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/note/">note</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/react/">react</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%84%E8%AE%BA/">评论</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/design/" rel="tag">design</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/econ/" rel="tag">econ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/note/" rel="tag">note</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scheme/" rel="tag">scheme</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ukulele/" rel="tag">ukulele</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" rel="tag">经济学</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/12/21/nand2tetris-2/">Nand2Tetris Part 2 课程总结</a>
+          </li>
+        
+          <li>
+            <a href="/2020/12/13/openjdk-epsilon-gc/">OpenJDK中的Epsilon GC</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/28/quickjs1-atom-hash/">QuickJS中的atom设计</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/17/nand2tetris-1/">Nand2Tetris Part 1 课程总结</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/09/llvm-1/">学习LLVM第1篇：官方入门教程笔记</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 <a target="_blank" rel="noopener" href="https://github.com/lhtin">tintin</a><br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
