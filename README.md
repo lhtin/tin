@@ -10,6 +10,8 @@
 - OpenJDK中的Serial GC
 - OpenJDK中的Parallel GC
 - OpenJDK中的G1 GC
+  - Getting Started with the G1 Garbage Collector：https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html
+  - Java Hotspot G1 GC的一些关键技术：https://tech.meituan.com/2016/09/23/g1.html
 - OpenJDK中的Shenandoah GC
 - OpenJDK中的ZGC
 - OpenJDK中的字节码解释器
@@ -17,6 +19,8 @@
 - OpenJDK中的C2即时编译器
 - OpenJDK中的Java标准库
 - OpenJDK中的Runtime
+
+- Java Platform, Standard Edition Documentation很详细的文档：
 
 最近计划：
 - 完成Nand2Tetris Part 2课程，并写一篇课程总结
