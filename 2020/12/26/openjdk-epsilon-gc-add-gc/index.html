@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2cdbc7958f6df4fec3751794de6e9c63";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-2');
+  </script>
+
+
+
+  
+  <title>给OpenJDK中的Epsilon GC添加GC功能 | 01的世界</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本文介绍如何给OpenJDK中的Epsilon GC增加一个简单的GC功能。核心内容（代码和原理解析）来做是Aleksey Shipilёv的*Do It Yourself (OpenJDK) Garbage Collector*文章。本文的目的是根据我自己的理解，用自己的话做一个总结。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="给OpenJDK中的Epsilon GC添加GC功能">
+<meta property="og:url" content="https://tintin.dev/2020/12/26/openjdk-epsilon-gc-add-gc/index.html">
+<meta property="og:site_name" content="01的世界">
+<meta property="og:description" content="本文介绍如何给OpenJDK中的Epsilon GC增加一个简单的GC功能。核心内容（代码和原理解析）来做是Aleksey Shipilёv的*Do It Yourself (OpenJDK) Garbage Collector*文章。本文的目的是根据我自己的理解，用自己的话做一个总结。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tintin.dev/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-snapshot.png">
+<meta property="og:image" content="https://tintin.dev/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-mark.png">
+<meta property="og:image" content="https://tintin.dev/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-calc.png">
+<meta property="og:image" content="https://tintin.dev/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-adjust.png">
+<meta property="og:image" content="https://tintin.dev/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-move.png">
+<meta property="article:published_time" content="2020-12-25T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-27T07:57:26.788Z">
+<meta property="article:author" content="tintin">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="OpenJDK">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tintin.dev/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-snapshot.png">
+  
+  
+    <link rel="icon" type="image/x-icon" href="/images/logo.jpg">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <span id="logo">01的世界</span>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://tintin.dev"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-openjdk-epsilon-gc-add-gc" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title article-title-tin" itemprop="headline name">
+      给OpenJDK中的Epsilon GC添加GC功能
+    </h1>
+  
+  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2020-12-25T16:00:00.000Z" itemprop="datePublished">2020-12-26</time></p>
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- # 给OpenJDK中的Epsilon GC添加GC功能 -->
+
+<p>之前写过一篇介绍OpenJDK中的Epsilon GC的<a target="_blank" rel="noopener" href="https://tin.js.org/2020/12/13/openjdk-epsilon-gc/">文章</a>，参考部分提到了Aleksey Shipilёv写的<a target="_blank" rel="noopener" href="https://shipilev.net/jvm/diy-gc/"><em>Do It Yourself (OpenJDK) Garbage Collector</em></a>。不过Shipilёv那篇文章写的主要是有关如何给Epsilon GC添加真正的GC功能，而不是介绍Epsilon GC的。我当时计划后面出一篇对Shipilёv那篇文章的总结文章，于是有了本文。注意本文中的GC代码全部来自于那篇文章，只是移除了其中的英文注释并做了少量细微的调整。</p>
+<p>在Shipilёv那篇文章中，作者给Epsilon GC添加了真正的GC功能，不过是一个极其简单的GC。它是一款基于标记-整理算法（Mark-Compact）的单线程无分代全堆GC。在进行垃圾回收时，需要阻塞用户线程（Stop The World）。</p>
+<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p>目前OpenJDK中所有的GC都使用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Tracing_garbage_collection">追踪式垃圾回收算法</a>，本文介绍的GC也采用了该算法，并且在整理内存时采用了<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Mark-compact_algorithm#LISP2_algorithm">LISP2-style Mark Compact</a>算法。为了使算法更加容易理解，引入一个小程序，算法中各个阶段的示例图片都来源于该程序：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C1</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> C2 c2;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">C1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        c2 = <span class="keyword">new</span> C2();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C2</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> C3 c3;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">C2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        c3 = <span class="keyword">new</span> C3();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C3</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">newC2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        C2 c2 = <span class="keyword">new</span> C2();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        C1 c1 = <span class="keyword">new</span> C1();</span><br><span class="line">        Main.newC2();</span><br><span class="line">        C3 c3 = <span class="keyword">new</span> C3();</span><br><span class="line">        <span class="comment">// 假设这个时候进行垃圾回收</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>算法主要步骤如下（图中的内容为假设上面Java程序中的注释点为垃圾收集点时的呈现）：</p>
+<ol start="0">
+<li><p>对象的初始状。GC Roots中的<code>c1</code>、<code>c3</code>表示引用，Heap中的<code>C1_1</code>表示类<code>C1</code>的一个实例。实线箭头表示引用，虚线箭头表示该对象将要移动的位置。</p>
+<img src="/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-snapshot.png" style="zoom:67%;" />
+</li>
+<li><p>标记可访问对象。从GC Roots（可以先简单理解为OpenJDK Runtime中引用的对象，比如局部变量）开始，递归遍历并标记每个可访问到的对象以及对象中为引用类型的字段指向的对象，直到所有可访问的对象都标记完成。另外还需要将标记的对象放到BitMap中去，BitMap是一个缩小版的Heap，只用于记录某个地址的对象是否被访问过。对象在BitMap的索引为对象地址除以64。</p>
+<img src="/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-mark.png" style="zoom:67%;" />
+</li>
+<li><p>计算标记对象的新地址。遍历标记的可访问对象，计算出对象将要移动的位置，并存储在对象的Mark Word处。计算的方式是：维护live指针和free指针，free指针初始时指向堆开头，live指针初始时执行第一个标记的对象（通过BitMap获取）。这时free指针指向的地址就是对象将要移动的位置，记录在对象的Mark Word中。然后给free指针加上根据对象的大小，表示下一个对象存放的位置，同时通过BitMap获取下一个标记的对象。一直下去直到所有标记的对象都处理了。</p>
+<img src="/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-calc.png" style="zoom:67%;" />
+</li>
+<li><p>修正引用地址。根据步骤2计算出的新地址，修正对象中为引用类型字段的指向和GC Roots中的指向。这一步会导致指向的内存地址错误，等待下一步移动对象之后才正常。</p>
+<img src="/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-adjust.png" style="zoom: 67%;" />
+</li>
+<li><p>移动对象。移动完之后需要更新堆内存顶部的指针，这样下次分配内存时候可以使用回收了的那部分内存。</p>
+<img src="/assets/openjdk-epsilon-add-gc/openjdk-epsilon-add-gc-move.png" style="zoom: 67%;" />
+
+</li>
+</ol>
+<h3 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h3><p>了解了算法的基本逻辑之后，再来看下具体到HotSpot JVM，要如何给它加上这个算法的GC。这里需要说明下，由于HotSpot JVM Runtime提供了大量现成的钩子，所以我们需要做的是实现一些Closure类（可以理解为回调函数），从而可以接触到GC Roots、对象中的引用，并进行各种处理。注意下面所有的代码均来自于Shipilëv在GitHub上的仓库，具体文件为<a target="_blank" rel="noopener" href="https://github.com/shipilev/jdk/blob/epsilon-mark-compact/src/hotspot/share/gc/epsilon/epsilonHeap.cpp">epsilonHeap.cpp</a>和<a target="_blank" rel="noopener" href="https://github.com/shipilev/jdk/blob/epsilon-mark-compact/src/hotspot/share/gc/epsilon/epsilonHeap.hpp">epsilonHeap.hpp</a>。对于没有定义的一些类和方法，可以从前面算法的演示和代码的注释中了解其大概内容，具体实现可以去源代码中看。</p>
+<p>整个GC，都是在<code>EpsilonHeap::entry_collect</code>方法中实现，为了按照算法的步骤展示代码，我将该方法中的代码分成了4个主要部分，并且省略了其他非核心的代码。</p>
+<ul>
+<li><p>标记过程</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::entry_collect</span><span class="params">(GCCause::Cause cause)</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  &#123;</span><br><span class="line">    GCTraceTime(Info, gc) time(<span class="string">&quot;Step 1: Mark&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/// 存放对象的栈数据结构</span></span><br><span class="line">    EpsilonMarkStack <span class="built_in">stack</span>;</span><br><span class="line">    <span class="comment">/// 将变量的对象进行标记并添加到stack中，并在_bitmap中记录下对应位置有对象</span></span><br><span class="line">    <span class="function">EpsilonScanOopClosure <span class="title">cl</span><span class="params">(&amp;<span class="built_in">stack</span>, &amp;_bitmap)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 标记所有的GC Roots并添加到stack中</span></span><br><span class="line">    process_roots(&amp;cl);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 将标记了的对象pop出来，然后对对象中引用的对象进行标记并添加到stack中</span></span><br><span class="line">    <span class="comment">/// 直到所有可访问的对象都标记完成了</span></span><br><span class="line">    <span class="keyword">while</span> (!<span class="built_in">stack</span>.is_empty()) &#123;</span><br><span class="line">      oop obj = <span class="built_in">stack</span>.pop();</span><br><span class="line">      <span class="comment">/// 遍历对象中的引用对象</span></span><br><span class="line">      obj-&gt;oop_iterate(&amp;cl);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::process_roots</span><span class="params">(OopClosure* cl)</span> </span>&#123; </span><br><span class="line">  do_roots(cl); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::do_roots</span><span class="params">(OopClosure* cl)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// Need to tell runtime we are about to walk the roots with 1 thread</span></span><br><span class="line">  <span class="function">StrongRootsScope <span class="title">scope</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 强引用Roots遍历</span></span><br><span class="line">  <span class="keyword">for</span> (OopStorageSet::Iterator it = OopStorageSet::strong_iterator(); !it.is_end(); ++it) &#123;</span><br><span class="line">    (*it)-&gt;oops_do(cl);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/// 目前没有对弱引用专门处理，所以当做强引用Roots一样进行遍历标记就好了</span></span><br><span class="line">  <span class="keyword">for</span> (OopStorageSet::Iterator it = OopStorageSet::weak_iterator(); !it.is_end(); ++it) &#123;</span><br><span class="line">    (*it)-&gt;oops_do(cl);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Need to adapt oop closure for some special root types.</span></span><br><span class="line">  <span class="function">CLDToOopClosure <span class="title">clds</span><span class="params">(cl, ClassLoaderData::_claim_none)</span></span>;</span><br><span class="line">  <span class="function">MarkingCodeBlobClosure <span class="title">blobs</span><span class="params">(cl, CodeBlobToOopClosure::FixRelocations)</span></span>;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/// 其他子系统</span></span><br><span class="line">  ClassLoaderDataGraph::cld_do(&amp;clds);</span><br><span class="line">  Threads::possibly_parallel_oops_do(<span class="literal">false</span>, cl, &amp;blobs);</span><br><span class="line"></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="function">MutexLocker <span class="title">lock</span><span class="params">(CodeCache_lock, Mutex::_no_safepoint_check_flag)</span></span>;</span><br><span class="line">    CodeCache::blobs_do(&amp;blobs);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 进行标记的Closure</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonScanOopClosure</span> :</span> <span class="keyword">public</span> BasicOopIterateClosure &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  EpsilonMarkStack* <span class="keyword">const</span> _stack;</span><br><span class="line">  MarkBitMap* <span class="keyword">const</span> _bitmap;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>&gt;</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">do_oop_work</span><span class="params">(T* p)</span> </span>&#123;</span><br><span class="line">    T o = RawAccess&lt;&gt;::oop_load(p);</span><br><span class="line">    <span class="keyword">if</span> (!CompressedOops::is_null(o)) &#123;</span><br><span class="line">      oop obj = CompressedOops::decode_not_null(o);</span><br><span class="line">      <span class="comment">/// 对没有被标记过的对象进行标记并push到_stack中</span></span><br><span class="line">      <span class="keyword">if</span> (!_bitmap-&gt;is_marked(obj)) &#123;</span><br><span class="line">        _bitmap-&gt;mark(obj);</span><br><span class="line">        _stack-&gt;push(obj);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  EpsilonScanOopClosure(EpsilonMarkStack* <span class="built_in">stack</span>, MarkBitMap* bitmap) :</span><br><span class="line">                        _stack(<span class="built_in">stack</span>), _bitmap(bitmap) &#123;&#125;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">do_oop</span><span class="params">(oop* p)</span>       </span>&#123; do_oop_work(p); &#125;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">do_oop</span><span class="params">(narrowOop* p)</span> </span>&#123; do_oop_work(p); &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>计算新地址过程</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::entry_collect</span><span class="params">(GCCause::Cause cause)</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  HeapWord* new_top;</span><br><span class="line">  &#123;</span><br><span class="line">    GCTraceTime(Info, gc) time(<span class="string">&quot;Step 2: Calculate new locations&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="function">EpsilonCalcNewLocationObjectClosure <span class="title">cl</span><span class="params">(_space-&gt;bottom(), &amp;preserved_marks)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/// 对前面搜索到的可访问对象进行线性遍历</span></span><br><span class="line">    walk_bitmap(&amp;cl);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 经过整理之后新的堆内存顶部，也就是没有被对象占用的位置，供后面移动完对象之后调整堆内存可用空间</span></span><br><span class="line">    new_top = cl.compact_point();</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 遍历bitmap</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::walk_bitmap</span><span class="params">(ObjectClosure* cl)</span> </span>&#123;</span><br><span class="line">   HeapWord* limit = _space-&gt;top();</span><br><span class="line">   HeapWord* addr = _bitmap.get_next_marked_addr(_space-&gt;bottom(), limit);</span><br><span class="line">   <span class="keyword">while</span> (addr &lt; limit) &#123;</span><br><span class="line">     oop obj = oop(addr);</span><br><span class="line">     cl-&gt;do_object(obj);</span><br><span class="line">     addr += <span class="number">1</span>;</span><br><span class="line">     <span class="keyword">if</span> (addr &lt; limit) &#123;</span><br><span class="line">       addr = _bitmap.get_next_marked_addr(addr, limit);</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonCalcNewLocationObjectClosure</span> :</span> <span class="keyword">public</span> ObjectClosure &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  HeapWord* _compact_point;</span><br><span class="line">  PreservedMarks* <span class="keyword">const</span> _preserved_marks;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  EpsilonCalcNewLocationObjectClosure(HeapWord* start, PreservedMarks* pm) :</span><br><span class="line">                                      _compact_point(start),</span><br><span class="line">                                      _preserved_marks(pm) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">do_object</span><span class="params">(oop obj)</span> </span>&#123;</span><br><span class="line">    <span class="comment">/// 只需要对前后位置变化了的对象进行计算</span></span><br><span class="line">    <span class="keyword">if</span> (obj != oop(_compact_point)) &#123;</span><br><span class="line">      markWord mark = obj-&gt;mark_raw();</span><br><span class="line">      <span class="keyword">if</span> (mark.must_be_preserved(obj-&gt;klass())) &#123;</span><br><span class="line">        _preserved_marks-&gt;push(obj, mark);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">/// 存储移动后的地址到mark word中</span></span><br><span class="line">      obj-&gt;forward_to(oop(_compact_point));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// 根据对象的大小移动free pointer</span></span><br><span class="line">    _compact_point += obj-&gt;size();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">HeapWord* <span class="title">compact_point</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> _compact_point;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改引用的地址</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::entry_collect</span><span class="params">(GCCause::Cause cause)</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  &#123;</span><br><span class="line">    GCTraceTime(Info, gc) time(<span class="string">&quot;Step 3: Adjust pointers&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    EpsilonAdjustPointersObjectClosure cl;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/// 遍历对象中的引用类型字段并修正引用地址为新地址</span></span><br><span class="line">    walk_bitmap(&amp;cl);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 同时还需要修正GC Roots中的引用地址为新地址</span></span><br><span class="line">    EpsilonAdjustPointersOopClosure cli;</span><br><span class="line">    process_roots(&amp;cli);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonAdjustPointersOopClosure</span> :</span> <span class="keyword">public</span> BasicOopIterateClosure &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>&gt;</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">do_oop_work</span><span class="params">(T* p)</span> </span>&#123;</span><br><span class="line">    T o = RawAccess&lt;&gt;::oop_load(p);</span><br><span class="line">    <span class="keyword">if</span> (!CompressedOops::is_null(o)) &#123;</span><br><span class="line">      oop obj = CompressedOops::decode_not_null(o);</span><br><span class="line">      <span class="keyword">if</span> (obj-&gt;is_forwarded()) &#123;</span><br><span class="line">        oop fwd = obj-&gt;forwardee();</span><br><span class="line">        <span class="comment">/// 更新引用地址</span></span><br><span class="line">        RawAccess&lt;&gt;::oop_store(p, fwd);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">do_oop</span><span class="params">(oop* p)</span>       </span>&#123; do_oop_work(p); &#125;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">do_oop</span><span class="params">(narrowOop* p)</span> </span>&#123; do_oop_work(p); &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonAdjustPointersObjectClosure</span> :</span> <span class="keyword">public</span> ObjectClosure &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  EpsilonAdjustPointersOopClosure _cl;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">do_object</span><span class="params">(oop obj)</span> </span>&#123;</span><br><span class="line">    obj-&gt;oop_iterate(&amp;_cl);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>移动对象</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::entry_collect</span><span class="params">(GCCause::Cause cause)</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  &#123;</span><br><span class="line">    GCTraceTime(Info, gc) time(<span class="string">&quot;Step 4: Move objects&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    EpsilonMoveObjectsObjectClosure cl;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/// 遍历并移动对象到新位置</span></span><br><span class="line">    walk_bitmap(&amp;cl);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/// 设置堆内存的新堆顶地址</span></span><br><span class="line">    _space-&gt;set_top(new_top);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonMoveObjectsObjectClosure</span> :</span> <span class="keyword">public</span> ObjectClosure &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">do_object</span><span class="params">(oop obj)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (obj-&gt;is_forwarded()) &#123;</span><br><span class="line">      oop fwd = obj-&gt;forwardee();</span><br><span class="line">      <span class="comment">/// 移动对象到新位置</span></span><br><span class="line">      Copy::aligned_conjoint_words(cast_from_oop&lt;HeapWord*&gt;(obj), cast_from_oop&lt;HeapWord*&gt;(fwd), obj-&gt;size());</span><br><span class="line">      fwd-&gt;init_mark_raw();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>触发时机</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 内存分配不足的时候</span></span><br><span class="line"><span class="function">HeapWord* <span class="title">EpsilonHeap::allocate_or_collect_work</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</span><br><span class="line">  HeapWord* res = allocate_work(size);</span><br><span class="line">  <span class="keyword">if</span> (res == <span class="literal">NULL</span> &amp;&amp; EpsilonSlidingGC) &#123;</span><br><span class="line">    vmentry_collect(GCCause::_allocation_failure);</span><br><span class="line">    res = allocate_work(size);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 调用System.gc()的时候</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EpsilonHeap::collect</span><span class="params">(GCCause::Cause cause)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">switch</span> (cause) &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">if</span> (EpsilonSlidingGC) &#123;</span><br><span class="line">        <span class="keyword">if</span> (SafepointSynchronize::is_at_safepoint()) &#123;</span><br><span class="line">          entry_collect(cause);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="comment">/// 非安全点，需要等待</span></span><br><span class="line">          vmentry_collect(cause);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        log_info(gc)(<span class="string">&quot;GC request for \&quot;%s\&quot; is ignored&quot;</span>, GCCause::to_string(cause));</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>通过学习Shipilëv的代码，可以让我（OpenJDK小白）比较快地熟悉HotSpot的其他子系统内容，可以为后面去了解HotSpot中的GC作些准备。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><p>Do It Yourself (OpenJDK) Garbage Collector：<a target="_blank" rel="noopener" href="https://shipilev.net/jvm/diy-gc/">https://shipilev.net/jvm/diy-gc/</a></p>
+</li>
+<li><p>LISP2-style Mark Compact：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Mark-compact_algorithm#LISP2_algorithm">https://en.wikipedia.org/wiki/Mark-compact_algorithm#LISP2_algorithm</a></p>
+<p>维基百科上关于本文提到的算法的介绍。</p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OpenJDK/" rel="tag">OpenJDK</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/12/23/the-design-of-everyday-things/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">日用品的设计（持续更新中）</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/note/">note</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/react/">react</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%84%E8%AE%BA/">评论</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenJDK/" rel="tag">OpenJDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/design/" rel="tag">design</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/econ/" rel="tag">econ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/note/" rel="tag">note</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/openjdk/" rel="tag">openjdk</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scheme/" rel="tag">scheme</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ukulele/" rel="tag">ukulele</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" rel="tag">经济学</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/12/26/openjdk-epsilon-gc-add-gc/">给OpenJDK中的Epsilon GC添加GC功能</a>
+          </li>
+        
+          <li>
+            <a href="/2020/12/23/the-design-of-everyday-things/">日用品的设计（持续更新中）</a>
+          </li>
+        
+          <li>
+            <a href="/2020/12/21/nand2tetris-2/">Nand2Tetris Part 2 课程总结</a>
+          </li>
+        
+          <li>
+            <a href="/2020/12/13/openjdk-epsilon-gc/">OpenJDK中的Epsilon GC</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/28/quickjs1-atom-hash/">QuickJS中的atom设计</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 <a target="_blank" rel="noopener" href="https://github.com/lhtin">tintin</a><br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
