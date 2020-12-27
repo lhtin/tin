@@ -101,7 +101,7 @@ theme: hexo-theme-landscape
 deploy:
   type: git
   repo:
-    github1: https://github.com/lhtin/tin.git
+    github1: https://github.com/lhtin/tin.git,static
 
 baidu_analytics: 2cdbc7958f6df4fec3751794de6e9c63
 google_analytics: UA-131906119-2
