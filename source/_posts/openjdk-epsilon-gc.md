@@ -5,6 +5,7 @@ categories:
 - note
 tags:
 - java
+- openjdk
 excerpt: 本文介绍OpenJDK中的Epsilon GC，包括内存分配方式、跟Runtime的对接。
 ---
 

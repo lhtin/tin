@@ -6,7 +6,7 @@
 - QuickJS中的字节码优化技术
 - QuickJS中的闭包
 
-- 给OpenJDK中的Epsilon GC添加垃圾回收功能
+- 给OpenJDK中的Epsilon GC添加垃圾回收功能：openjdk-epsilon-with-gc.md
 - OpenJDK中的Serial GC
 - OpenJDK中的Parallel GC
 - OpenJDK中的G1 GC
