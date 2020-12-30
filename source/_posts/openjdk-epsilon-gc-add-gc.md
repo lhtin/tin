@@ -10,8 +10,6 @@ tags:
 excerpt: 本文介绍如何给OpenJDK中的Epsilon GC增加一个简单的GC功能。核心内容（代码和原理解析）来做是Aleksey Shipilёv的*Do It Yourself (OpenJDK) Garbage Collector*文章。本文的目的是根据我自己的理解，用自己的话做一个总结。
 ---
 
-<!-- # 给OpenJDK中的Epsilon GC添加GC功能 -->
-
 之前写过一篇介绍OpenJDK中的Epsilon GC的[文章](https://tin.js.org/2020/12/13/openjdk-epsilon-gc/)，参考部分提到了Aleksey Shipilёv写的[*Do It Yourself (OpenJDK) Garbage Collector*](https://shipilev.net/jvm/diy-gc/)。不过Shipilёv那篇文章写的主要是有关如何给Epsilon GC添加真正的GC功能，而不是介绍Epsilon GC的。我当时计划后面出一篇对Shipilёv那篇文章的总结文章，于是有了本文。注意本文中的GC代码全部来自于那篇文章，只是移除了其中的英文注释并做了少量细微的调整。
 
 在Shipilёv那篇文章中，作者给Epsilon GC添加了真正的GC功能，不过是一个极其简单的GC。它是一款基于标记-整理算法（Mark-Compact）的单线程无分代全堆GC。在进行垃圾回收时，需要阻塞用户线程（Stop The World）。

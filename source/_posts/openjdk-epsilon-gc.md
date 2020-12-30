@@ -9,8 +9,6 @@ tags:
 excerpt: 本文介绍OpenJDK中的Epsilon GC，包括内存分配方式、跟Runtime的对接。
 ---
 
-原文地址：[https://tin.js.org/2020/12/13/openjdk-epsilon-gc/](https://tin.js.org/2020/12/13/openjdk-epsilon-gc/)
-
 Epsilon GC实际上是一款no-op GC，即只进行内存分配，不进行内存回收。本文用于介绍Epsilon GC的内存分配方式，以及GC是如何与HotSpot JVM的其他部分打交道的。
 
 通过 [JEP 304: Garbage Collector Interface](https://openjdk.java.net/jeps/304) 提案，HotSpot为各个GC抽象出了一套统一的GC接口。这使得新GC可以像插件一样很轻松地添加到JVM中。添加新GC时，除了自身的代码，对JVM中其他代码的改动非常小且很容易修改（改动其他地方的主要目的是为了让JVM能识别出新GC）。而后面添加到JVM中的Epsilon GC（[JEP 318](https://openjdk.java.net/jeps/318)）就是这个 JEP 304 提案的受益者，反过来也说明 JEP 304 提案实现的效果不错。这其实也方便了像我这种JVM小白阅读JVM的源代码。
