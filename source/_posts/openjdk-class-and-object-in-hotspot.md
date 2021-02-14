@@ -17,7 +17,7 @@ excerpt: 本文记录Java类和对象在HotSpot中的实现方式。
 
 在HotSpot加载和解析类文件后，会创建InstanceKlass实例，紧接着实例的内存存放了vtable（虚函数表）和itable（接口和接口方法表）等信息。
 
-Klass及其子类的继承关系如下面的代码所示。其中InstanceKlass实例为普通Java类的C++表示，InstanceMirrorKlass实例为java.lang.Class类的C++表示（因此InstanceMirrorKlass实例只有一个）。在HotSpot中，Java类的静态字段也使用oop对象表示（每个Java类只有一个，存储在InstanceKlass实例的_java_mirror字段），不过并不是由对应的InstanceKlass实例创建，而是由唯一的InstanceMirrorKlass实例根据传入的InstanceKlass实例来创建。_java_mirror是在InstanceKlass实例生成过程中创建的。
+Klass及其子类的继承关系如下面的代码所示。其中InstanceKlass实例为普通Java类的C++表示，InstanceMirrorKlass实例为java.lang.Class类的C++表示（因此InstanceMirrorKlass实例只有一个）。在HotSpot中，Java类的静态字段也使用oop对象表示（每个Java类只有一个，存储在InstanceKlass实例的_java_mirror字段），不过并不是由对应的InstanceKlass实例创建，而是由唯一的InstanceMirrorKlass实例根据传入的InstanceKlass实例来创建。_java_mirror是在InstanceKlass实例生成过程中创建的，这也说明静态字段跟实例字段一样，存储在Java堆中。
 
 ```cpp
  /* src/hotspot/share/oops/oopsHierarchy.hpp */
