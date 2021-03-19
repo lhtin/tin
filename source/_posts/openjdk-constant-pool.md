@@ -19,7 +19,50 @@ excerpt: 本文记录HotSpot实现运行时常量池的细节。
 2. class链接阶段会对运行时常量池做两件事情，一是收集常量池中的符号引用类型的常量，这些常量都需要进一步的解析（resolve）。这一步主要是给需要进一步解析的常量分配存储空间，用于存储字节码执行阶段解析得到的内容。二是遍历class文件中的字节码，将符号引用操作数（即ConstantPool中的索引值）替换为ConstantPoolCache中的索引值。每个索引值指向的是一个`ConstantPoolCacheEntry`对象。
 3. 字节码指向阶段就是真正的符号引用解析过程。比如在执行`getfield`字节码的时候，首先根据操作数获取ConstantPool中对应的CONSTANT_Class信息。首先看下ConstantPool中的\_resolved_klasses是否存在过，如果不存在的话就使用类加载器加载，然后存到\_resolve_klasses中去。下次遇到同一个class时就可以直接使用了。
 
-下面详细介绍每个阶段做的事情。
+下面详细介绍每个阶段做的事情。在讲解每个阶段之前，先给出一个HelloWorld Java程序和对应的class文件中的常量池，后面会使用到：
+
+```java
+public class HelloWorld {
+    public static void main(String... args) {
+        System.out.println("Hello World!");
+    }
+}
+```
+
+编译后的class文件中的常量池如下（可以使用`javap -v HelloWorld`查看，也可以使用我最近做的[Web小工具](https://tin.js.org/class-file-viewer/?useDefaultClass=true)查看class文件内容）：
+
+```
+   #1 = Methodref          #2.#3          // java/lang/Object."<init>":()V
+   #2 = Class              #4             // java/lang/Object
+   #3 = NameAndType        #5:#6          // "<init>":()V
+   #4 = Utf8               java/lang/Object
+   #5 = Utf8               <init>
+   #6 = Utf8               ()V
+   #7 = Fieldref           #8.#9          // java/lang/System.out:Ljava/io/PrintStream;
+   #8 = Class              #10            // java/lang/System
+   #9 = NameAndType        #11:#12        // out:Ljava/io/PrintStream;
+  #10 = Utf8               java/lang/System
+  #11 = Utf8               out
+  #12 = Utf8               Ljava/io/PrintStream;
+  #13 = String             #14            // Hello World!
+  #14 = Utf8               Hello World!
+  #15 = Methodref          #16.#17        // java/io/PrintStream.println:(Ljava/lang/String;)V
+  #16 = Class              #18            // java/io/PrintStream
+  #17 = NameAndType        #19:#20        // println:(Ljava/lang/String;)V
+  #18 = Utf8               java/io/PrintStream
+  #19 = Utf8               println
+  #20 = Utf8               (Ljava/lang/String;)V
+  #21 = Class              #22            // HelloWorld
+  #22 = Utf8               HelloWorld
+  #23 = Utf8               Code
+  #24 = Utf8               LineNumberTable
+  #25 = Utf8               main
+  #26 = Utf8               ([Ljava/lang/String;)V
+  #27 = Utf8               SourceFile
+  #28 = Utf8               HelloWorld.java
+```
+
+
 
 ### class文件解析阶段
 
@@ -77,6 +120,8 @@ cp->unresolved_klass_at_put(index, class_index, num_klasses++);
 第二次遍历做各种常量对应的字符串格式校验。比如CONSTANT_Class名称需要符合jvms（[jvms15-4.21](https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.2.1)）中规定的格式，还有像方法名称和签名，都需要符合jvms中固定的格式。
 
 最后在解析到class文件中的BootstrapMethods属性时，将其内容存储到`cp`的`_operands`中去。至此，第一阶段就算完成了。
+
+
 
 ### class链接阶段
 
@@ -235,76 +280,235 @@ void Rewriter::make_constant_pool_cache(TRAPS) {
 
 至此，运行时常量池涉及到的对象就创建完成了。包括ConstantPool、ConstantPoolCache、ConstantPoolCacheEntry。关系图如下：
 
-![](../assets/hotspot/runtime-constant-pool.png)
+![](/assets/hotspot/runtime-constant-pool.png)
+
+
 
 ### 字节码执行阶段
 
+这个阶段的目的对常量进行解析（resolution），从而支撑字节码的执行，也就是将上图对应的NULL等确定好。不同字节码对运行时常量池的解析各不同。对常量池的解析主要包括字段操作、方法调用、引用常量加载三类。下面分别以getfield（字段操作）、invokevirtual（方法调用）、ldc（引用类型常量加载）来分析解析过程。
 
+#### getfield
 
+分两个步骤。第一步根据操作数（即对应的ConstantPoolCacheEntry索引），从对应的ConstantPoolCacheEntryList中获取ConstantPoolCacheEntry对象，再取出对应的cp_index，然后对其进行解析，得到类名、字段名和字段类型。根据类名对应的resolved\_klass\_index，在ConstantPool中的_resolved_klasses中检查对应的位置是否已经存在了解析好的，不存在则使用类加载器加载类名对应的类文件（`SystemDictionary::resolve_or_fail`）。找到了类之后，根据字段名和字段类型找到具体字段。最后 将解析到的信息设置到对应的ConstantPoolCacheEntry中。
 
+```c++
+/* src/hotspot/share/interpreter/interpreterRuntime.cpp */
+// 支持getstatic、putstatic、getfield、putfield指令
+void InterpreterRuntime::resolve_get_put(JavaThread* thread, Bytecodes::Code bytecode) {
+  Thread* THREAD = thread;
+  fieldDescriptor info;
+  LastFrameAccessor last_frame(thread);
+  constantPoolHandle pool(thread, last_frame.method()->constants());
+  methodHandle m(thread, last_frame.method());
+  bool is_put    = (bytecode == Bytecodes::_putfield  || bytecode == Bytecodes::_nofast_putfield ||
+                    bytecode == Bytecodes::_putstatic);
+  bool is_static = (bytecode == Bytecodes::_getstatic || bytecode == Bytecodes::_putstatic);
 
-下面以HelloWorld为例演示每个阶段运行时常量池的内容变化情况。HelloWorld程序的源代码如下：
+  {
+    JvmtiHideSingleStepping jhss(thread);
+    // 根据字段名称和类型从类中找到具体字段
+    LinkResolver::resolve_field_access(info, pool, last_frame.get_index_u2_cpcache(bytecode),
+                                       m, bytecode, CHECK);
+  }
 
-```java
-public class HelloWorld {
-    public static void main(String... args) {
-        System.out.println("Hello World!");
+  ConstantPoolCacheEntry* cp_cache_entry = last_frame.cache_entry();
+  if (cp_cache_entry->is_resolved(bytecode)) return;
+  TosState state  = as_TosState(info.field_type());
+  InstanceKlass* klass = info.field_holder();
+  bool uninitialized_static = is_static && !klass->is_initialized();
+  bool has_initialized_final_update = info.field_holder()->major_version() >= 53 &&
+                                      info.has_initialized_final_update();
+  Bytecodes::Code get_code = (Bytecodes::Code)0;
+  Bytecodes::Code put_code = (Bytecodes::Code)0;
+  if (!uninitialized_static) {
+    get_code = ((is_static) ? Bytecodes::_getstatic : Bytecodes::_getfield);
+    if ((is_put && !has_initialized_final_update) || !info.access_flags().is_final()) {
+      put_code = ((is_static) ? Bytecodes::_putstatic : Bytecodes::_putfield);
     }
+  }
+
+  // 根据解析到的信息设置到ConstantPoolCacheEntry中
+  cp_cache_entry->set_field(
+    get_code,
+    put_code,
+    info.field_holder(),
+    info.index(),
+    info.offset(), /// 在解析class文件时，已经计算好了每个field的偏移值
+    state,
+    info.access_flags().is_final(),
+    info.access_flags().is_volatile(),
+    pool->pool_holder()
+  );
 }
 ```
 
-编译后的class文件中的常量池如下（可以使用`javap -v HelloWorld`查看，也可以使用我最近做的[Web小工具](https://tin.js.org/class-file-viewer/?useDefaultClass=true)查看class文件内容）：
+#### invokevirtual
 
-```
-   #1 = Methodref          #2.#3          // java/lang/Object."<init>":()V
-   #2 = Class              #4             // java/lang/Object
-   #3 = NameAndType        #5:#6          // "<init>":()V
-   #4 = Utf8               java/lang/Object
-   #5 = Utf8               <init>
-   #6 = Utf8               ()V
-   #7 = Fieldref           #8.#9          // java/lang/System.out:Ljava/io/PrintStream;
-   #8 = Class              #10            // java/lang/System
-   #9 = NameAndType        #11:#12        // out:Ljava/io/PrintStream;
-  #10 = Utf8               java/lang/System
-  #11 = Utf8               out
-  #12 = Utf8               Ljava/io/PrintStream;
-  #13 = String             #14            // Hello World!
-  #14 = Utf8               Hello World!
-  #15 = Methodref          #16.#17        // java/io/PrintStream.println:(Ljava/lang/String;)V
-  #16 = Class              #18            // java/io/PrintStream
-  #17 = NameAndType        #19:#20        // println:(Ljava/lang/String;)V
-  #18 = Utf8               java/io/PrintStream
-  #19 = Utf8               println
-  #20 = Utf8               (Ljava/lang/String;)V
-  #21 = Class              #22            // HelloWorld
-  #22 = Utf8               HelloWorld
-  #23 = Utf8               Code
-  #24 = Utf8               LineNumberTable
-  #25 = Utf8               main
-  #26 = Utf8               ([Ljava/lang/String;)V
-  #27 = Utf8               SourceFile
-  #28 = Utf8               HelloWorld.java
-```
-
-
-
-
+跟`getfield`指令类似，首选是确定操作数中指向的klass，之前没有加载过的话就先加载，加载好了存储到\_resolved\_klasses。然后根据方法的名称和签名，从对应的类中查找具体的方法。查找的顺序是首选从类自身查找，没有找到的话再从父类中查找。找到之后，根据一些规则确定该方法是否可以作为final方法进行调用，可以的话，则将该方法的地址设置到ConstantPoolCacheEntry的\_f2中。不能直接确定的话，则将方法的vtable_index记录到\_f2中，然后根据vtable_index从目标对象的vtable中取出实际的方法进行执行（即虚函数调用）。
 
 ```c++
-class ConstantPool : public Metadata {
-  Array<u1>*           _tags;	// 按照index存储每个常量的tag值
-  Array<Klass*>*       _resolved_klasses; // 缓存运行过程中用到的加载好的klass，供下次使用
-  /* 跟class文件中的常量索引一致 */
-  /*
-  #0 保留
-  #1 | name_and_type_index(#3) | class_index(#2) |
-  #2 | name_index(#4)														 |
-  #3 | signature_index(#6)     | name_index(#5)  |
-  #4 | Symbol("java/lang/Object") 							 |
-  #5 | Symbol("<init>")											     |
-  #6 | Symbol("()V")													   |
+/* src/hotspot/share/interpreter/interpreterRuntime.cpp */
+// 支持invokevirutal、invokespecial、invokestatic、invokeinterface
+void InterpreterRuntime::resolve_invoke(JavaThread* thread, Bytecodes::Code bytecode) {
+  Thread* THREAD = thread;
+  LastFrameAccessor last_frame(thread);
+  Handle receiver(thread, NULL);
+  if (bytecode == Bytecodes::_invokevirtual || bytecode == Bytecodes::_invokeinterface ||
+      bytecode == Bytecodes::_invokespecial) {
+    ResourceMark rm(thread);
+    methodHandle m (thread, last_frame.method());
+    Bytecode_invoke call(m, last_frame.bci());
+    Symbol* signature = call.signature();
+    /// 表示被调用方法的真实所有者，即this对象
+    receiver = Handle(thread, last_frame.callee_receiver(signature));
+  }
+
+  CallInfo info;
+  constantPoolHandle pool(thread, last_frame.method()->constants());
+
+  methodHandle resolved_method;
+
+  {
+    JvmtiHideSingleStepping jhss(thread);
+    LinkResolver::resolve_invoke(info, receiver, pool,
+                                 last_frame.get_index_u2_cpcache(bytecode), bytecode,
+                                 CHECK);
+    if (JvmtiExport::can_hotswap_or_post_breakpoint() && info.resolved_method()->is_old()) {
+      resolved_method = methodHandle(THREAD, info.resolved_method()->get_new_method());
+    } else {
+      resolved_method = methodHandle(THREAD, info.resolved_method());
+    }
+  }
+
+  ConstantPoolCacheEntry* cp_cache_entry = last_frame.cache_entry();
+  if (cp_cache_entry->is_resolved(bytecode)) return;
+
+  InstanceKlass* sender = pool->pool_holder();
+  sender = sender->is_unsafe_anonymous() ? sender->unsafe_anonymous_host() : sender;
+
+  // 根据调用类型进行设置
+  switch (info.call_kind()) {
+  case CallInfo::direct_call:
+    cp_cache_entry->set_direct_call(
+      bytecode,
+      resolved_method,
+      sender->is_interface());
+    break;
+  case CallInfo::vtable_call:
+    cp_cache_entry->set_vtable_call(
+      bytecode,
+      resolved_method,
+      info.vtable_index());
+    break;
+  case CallInfo::itable_call:
+    cp_cache_entry->set_itable_call(
+      bytecode,
+      info.resolved_klass(),
+      resolved_method,
+      info.itable_index());
+    break;
+  default:  ShouldNotReachHere();
+  }
+}
+
+/* src/hotspot/share/oops/cpCache.cpp */
+void ConstantPoolCacheEntry::set_direct_or_vtable_call(Bytecodes::Code invoke_code,
+                                                       const methodHandle& method,
+                                                       int vtable_index,
+                                                       bool sender_is_interface) {
+  bool is_vtable_call = (vtable_index >= 0);  // FIXME: split this method on this boolean
+
+  int byte_no = -1;
+  bool change_to_virtual = false;
+  InstanceKlass* holder = NULL;  // have to declare this outside the switch
+  switch (invoke_code) {
+    ...
+    case Bytecodes::_invokevirtual:
+      {
+        if (!is_vtable_call) {
+          set_method_flags(as_TosState(method->result_type()),
+                           (                             1      << is_vfinal_shift) |
+                           ((method->is_final_method() ? 1 : 0) << is_final_shift)  |
+                           ((change_to_virtual         ? 1 : 0) << is_forced_virtual_shift),
+                           method()->size_of_parameters());
+          set_f2_as_vfinal_method(method());
+        } else {
+          set_method_flags(as_TosState(method->result_type()),
+                           ((change_to_virtual ? 1 : 0) << is_forced_virtual_shift),
+                           method()->size_of_parameters());
+          set_f2(vtable_index);
+        }
+        byte_no = 2;
+        break;
+      }
+    ...
+  }
   ...
-  */
-};
+}
 ```
+
+#### ldc
+
+注意在第二阶段，如果`ldc`加载的是引用类型数据，则会将操作符进一步改为`fast_aldc`。如果ConstantPoolCache的resovled_references中对应位置为NULL，说明还没有加载，需要调用`InterpreterRuntime::resolve_ldc`进行加载。以加载字符串为例：
+
+```c++
+oop ConstantPool::resolve_constant_at_impl(const constantPoolHandle& this_cp,
+                                           int index, int cache_index,
+                                           bool* status_return, TRAPS) {
+  oop result_oop = NULL;
+  Handle throw_exception;
+
+  if (cache_index == _possible_index_sentinel) {
+    cache_index = this_cp->cp_to_object_index(index);
+  }
+  if (cache_index >= 0) {
+    result_oop = this_cp->resolved_references()->obj_at(cache_index);
+    if (result_oop != NULL) {
+      /// 已存在
+      if (result_oop == Universe::the_null_sentinel()) {
+        result_oop = NULL;
+      }
+      if (status_return != NULL)  (*status_return) = true;
+      return result_oop;
+    }
+    index = this_cp->object_to_cp_index(cache_index);
+  }
+
+  jvalue prim_value;
+  constantTag tag = this_cp->tag_at(index);
+  ...
+  switch (tag.value()) {
+  ...
+  case JVM_CONSTANT_String:
+    if (this_cp->is_pseudo_string_at(index)) {
+      result_oop = this_cp->pseudo_string_at(index, cache_index);
+      break;
+    }
+    // 根据第一步创建的Symbol，调用StringTable::intern构建String实例，并存储到resolved_references中
+    result_oop = string_at_impl(this_cp, index, cache_index, CHECK_NULL);
+    break;
+  }
+
+  if (cache_index >= 0) {
+    oop new_result = (result_oop == NULL ? Universe::the_null_sentinel() : result_oop);
+    /// 存储加载好的内容
+    oop old_result = this_cp->resolved_references()
+      ->atomic_compare_exchange_oop(cache_index, new_result, NULL);
+    if (old_result == NULL) {
+      return result_oop;
+    } else {
+      if (old_result == Universe::the_null_sentinel())
+        old_result = NULL;
+      return old_result;
+    }
+  } else {
+    return result_oop;
+  }
+}
+```
+
+
+
+至此，HelloWorld的整个运行时常量池的所有内容就都创建好了。
 
