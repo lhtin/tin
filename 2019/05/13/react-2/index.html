@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2cdbc7958f6df4fec3751794de6e9c63";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131906119-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131906119-2');
+  </script>
+
+
+
+  
+  <title>玩转React系列2：寻找更高效的列表更新算法 | 01的世界</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本文接着上篇《玩转React系列1：React工作原理》最后提到的React列表更新的问题，来深入探讨下是否有更高效的列表更新方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="玩转React系列2：寻找更高效的列表更新算法">
+<meta property="og:url" content="https://tintin.dev/2019/05/13/react-2/index.html">
+<meta property="og:site_name" content="01的世界">
+<meta property="og:description" content="本文接着上篇《玩转React系列1：React工作原理》最后提到的React列表更新的问题，来深入探讨下是否有更高效的列表更新方式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-05-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-23T04:50:31.583Z">
+<meta property="article:author" content="tintin">
+<meta property="article:tag" content="note">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" type="image/x-icon" href="/images/logo.jpg">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <span id="logo">01的世界</span>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://tintin.dev"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-react-2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title article-title-tin" itemprop="headline name">
+      玩转React系列2：寻找更高效的列表更新算法
+    </h1>
+  
+  <p class="article-meta-tin">by tintin @<time class="dt-published" datetime="2019-05-12T16:00:00.000Z" itemprop="datePublished">2019-05-13</time></p>
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本文接着上篇《玩转React系列1：React工作原理》最后提到的React列表更新的问题，来深入探讨下是否有更高效的列表更新方式。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li>0. 问题描述</li>
+<li>1. 寻找更高效的方法</li>
+<li>2. benchmark</li>
+</ul>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>上一篇文章最后提到，React更新算法有一个问题，就是选取的不动子列表S可能不是最长的。比如将S1中的最后一个元素e<sub>n</sub>移动到第一个元素e<sub>1</sub>前面，变成S2的情况。React选取的不动子列表只包含最后一个元素e<sub>n</sub>，所以需要移动其他n-1个元素。但实际上可以将[e<sub>1</sub>, …, e<sub>n-1</sub>]作为不动子列表，从而只需要做一次移动操作，也就是将e<sub>n</sub>移动到e<sub>1</sub>的前面。</p>
+<p>本文尝试探索一种新的方法，来减少元素移动的次数。以及做一个基准测试来确定使用新的方法是否更省时。</p>
+<h2 id="寻找更高效的方法"><a href="#寻找更高效的方法" class="headerlink" title="寻找更高效的方法"></a>寻找更高效的方法</h2><p>为了更清晰的讨论这个问题，我们先做一个合理的假设，假设从列表S1（prevChildren）到列表S2（nextChildren），只是子元素的顺序变了，没有新增和删除子元素。这个假设是合理的，因为不管是哪种更新方式，新增和删除的操作都是一样的，不会影响算法复杂度。另外为了描述方便，假设S1和S2中的元素由该元素在S1中的位置（下标）代替，比如如果S1为d、c、a、b，S2为b、a、d、c。换成下标S1就是0、1、2、3（即d在S1中的位置、c在S1中的位置、a在S1中的位置、b在S1中的位置），S2就是3、2、0、1（即b在S1中的位置、a在S1中的位置、d在S1中的位置、c在S1中的位置）。</p>
+<p>首先我们将S2中的n个元素分成k个列表，分的方式是先把S2中第一个元素作为列表的第一个元素，然后顺序判断S2后面的元素，如果遇到的元素小于当前列表的最后一个元素，则将其添加到当前列表后面。S2中的元素全部判断完后，从S2中移除掉在当前列表中的元素。然后进行下一轮同样的操作，直到S2中的元素全部被移除。比如S2为5、1、3、2、0、4，则可以分成3个列表，第一个为5、1、0，第二个为3、2，第三个为4。分的过程如下：</p>
+<table>
+  <tr>
+    <td>初始S2为</td>
+    <td>5、1、3、2、0、4</td>
+  </tr>
+  <tr>
+    <td>第一轮找到的列表为</td>
+    <td>5、1、0</td>
+  </tr>
+  <tr>
+    <td>移除掉找到的元素后S2为</td>
+    <td>3、2、4</td>
+  </tr>
+  <tr>
+    <td>第二轮找到的列表为</td>
+    <td>3、2</td>
+  </tr>
+  <tr>
+    <td>移除掉找到的元素后S2为</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>第三轮找到的列表为</td>
+    <td>4</td>
+  </tr>
+</table>
+
+<p>然后就可以从分成的每个列表中找到一个元素，构成我们所要找的最长子列表。找的方式是这样子的：将最后一个列表的第一个元素作为最长子列表的最后一个元素，然后依次往前，在前一个列表中从前往后找到第一个小于这个元素的元素作为当前元素的前一个元素。以上面找到的3个列表为例，过程如下：</p>
+<table>
+  <tr>
+    <td>第三个列表</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>所以找到的元素为</td>
+    <td>4（列表中的第一个元素）</td>
+  </tr>
+  <tr>
+    <td>第二个列表</td>
+    <td>3、2</td>
+  </tr>
+  <tr>
+    <td>所以找到的元素为</td>
+    <td>3（列表中第一个小于4的元素）</td>
+  </tr>
+  <tr>
+    <td>第一个列表</td>
+    <td>5、1、0</td>
+  </tr>
+  <tr>
+    <td>所找到的元素为</td>
+    <td>1（列表中第一个小于3的元素）</td>
+  </tr>
+  <tr>
+    <td>所要找的最长子列表为</td>
+    <td>1、3、4（将找到的元素反过来）</td>
+  </tr>
+</table>
+
+<p>有几个点需要证明：</p>
+<ol>
+<li>最长子列表中的元素一定来自于所分成的不同列表，最长子列表的长度一定小于等于k</li>
+<li>按照上面方式找到的最长子列表中元素的先后顺序跟S2中这些元素的先后顺序一致</li>
+</ol>
+<p>证明：</p>
+<ol>
+<li>按照定义，分成的每一个列表中元素的先后顺序，跟S2中这些元素的先后顺序一致，但是跟S1中这些元素的先后顺序相反。而最长子列表中元素的先后顺序要满足跟S2和S1中这些元素的先后顺序都一致。如果最长子列表有超过一个元素来自于同一个列表，则来自同一个列表的这几个元素是按照从大到小排列的。但是上面对S1的假设确定了S1中的元素是按照从小往大排列的，矛盾了。所以最长子列表中的元素一定来自于不同的列表，所以最长子列表的长度一定小于等于k。</li>
+<li>根据最长子列表和S2分成的列表的定义，假设找到的某个列表中的元素为a，找到的该列表的上一个列表中的元素为b，则a大于b，所以也就是要证明在S2中a排在b的后面。如果a排在b的前面且a大于b，但是上一个列表中只包含b而不包含a，这说明上一个列表中包含一个小于a但是大于b的元素c，且c排在a的前面。如果是这样的话，那么找到的上一个列表中的元素应该是c而不是b，因为c和b都在上一个列表中且c排在b的前面。所以a只能排在b的后面，因此得到的最长子列表中元素的先后顺序跟S2中这些元素的先后顺序一致。</li>
+</ol>
+<p>有了上面的定义，寻找最长子列表的步骤可以分成两步。一是将S2按照上面的分法分成k个列表。二是从这k个列表的最后一个列表开始，从每个列表中取出一个元素，就组成了所要找的最长子列表。</p>
+<p>算法实现如下（主要的优化点在如何将S2分成k个列表上面，详情请看注释）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getBestList</span> (<span class="params">S2</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 1. 将S2分成k个列表，时间复杂度O(nlogn)</span></span><br><span class="line">  <span class="keyword">let</span> levelList = [</span><br><span class="line">    [S2[<span class="number">0</span>]]</span><br><span class="line">  ]</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">1</span>; i &lt; S2.length; i += <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> x = S2[i]</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 二分法查寻找刚好比x大的那个列表，</span></span><br><span class="line">    <span class="keyword">let</span> start = <span class="number">0</span></span><br><span class="line">    <span class="keyword">let</span> end = levelList.length - <span class="number">1</span></span><br><span class="line">    <span class="comment">// 中间位置</span></span><br><span class="line">    <span class="keyword">let</span> mid = <span class="built_in">Math</span>.floor((start + end) / <span class="number">2</span>)</span><br><span class="line">    <span class="comment">// 中间位置对应的列表</span></span><br><span class="line">    <span class="keyword">let</span> level = levelList[mid]</span><br><span class="line">    <span class="comment">// 列表的最小值</span></span><br><span class="line">    <span class="keyword">let</span> min = level[level.length - <span class="number">1</span>]</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (x &lt; min) &#123;</span><br><span class="line">        <span class="comment">// 如果当前元素小于中间列表的最后一个元素，</span></span><br><span class="line">        <span class="comment">// 说明x应该添加到start～mid中的某一个列表中</span></span><br><span class="line">        <span class="comment">// 所以缩小范围，从start～mid的列表中寻找</span></span><br><span class="line">        end = mid</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 如果当前元素大于中间列表的最后一个元素，</span></span><br><span class="line">        <span class="comment">// 说明x不可能添加到start～mid中的任何一个列表中</span></span><br><span class="line">        <span class="comment">// 所以缩小范围，从mid+1～end的列表中寻找</span></span><br><span class="line">        start = mid + <span class="number">1</span></span><br><span class="line">      &#125;</span><br><span class="line">      mid = <span class="built_in">Math</span>.floor((start + end) / <span class="number">2</span>)</span><br><span class="line">      level = levelList[mid]</span><br><span class="line">      min = level[level.length - <span class="number">1</span>]</span><br><span class="line">    &#125; <span class="keyword">while</span> (start &lt; end)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (x &lt; min) &#123;</span><br><span class="line">      <span class="comment">// 如果停留在的那个列表的最后一个元素大于x，则将x添加到这个列表最后</span></span><br><span class="line">      levelList[start].push(x)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 如果大于，说明没有合适的列表可以添加x进去，则在后面新增一个列表并添加x</span></span><br><span class="line">      levelList.push([x])</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2. 从这k个列表中获取最长子列表，时间复杂度O(n)</span></span><br><span class="line">  <span class="keyword">let</span> best = [</span><br><span class="line">    levelList[levelList.length - <span class="number">1</span>][<span class="number">0</span>] <span class="comment">// 最后一个列表的第一个元素</span></span><br><span class="line">  ]</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = levelList.length - <span class="number">2</span>; i &gt;= <span class="number">0</span>; i -= <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> level = levelList[i]</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j &lt; level.length; j += <span class="number">1</span>) &#123;</span><br><span class="line">      <span class="keyword">let</span> x = level[j]</span><br><span class="line">      <span class="keyword">if</span> (x &lt; best[best.length - <span class="number">1</span>]) &#123;</span><br><span class="line">        <span class="comment">// 第一个小于之前找到的元素</span></span><br><span class="line">        best.push(x)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 元素顺序要反转一下</span></span><br><span class="line">  best.reverse()</span><br><span class="line">  <span class="keyword">return</span> best</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用例：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> S1 = [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br><span class="line"><span class="keyword">let</span> S2 = [<span class="number">5</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">4</span>]</span><br><span class="line"><span class="keyword">let</span> best = getBestList(S2)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`S1: <span class="subst">$&#123;S1&#125;</span>`</span>)</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`S2: <span class="subst">$&#123;S2&#125;</span>`</span>)</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`最长子列表为：<span class="subst">$&#123;best&#125;</span>`</span>)</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`所以进行<span class="subst">$&#123;S1.length - best.length&#125;</span>次移动可以将S1转换为S2：`</span>)</span><br><span class="line"><span class="keyword">let</span> actions = []</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; S2.length; i += <span class="number">1</span>) &#123;</span><br><span class="line">  <span class="keyword">let</span> x = S2[i]</span><br><span class="line">  <span class="keyword">if</span> (best.indexOf(x) === -<span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (i === <span class="number">0</span>) &#123;</span><br><span class="line">      moveBefore(x, S2[i + <span class="number">1</span>], S1)</span><br><span class="line">      actions.push(<span class="string">`将S1中的<span class="subst">$&#123;x&#125;</span>移动到<span class="subst">$&#123;S2[i + <span class="number">1</span>]&#125;</span>的前面，S1变为：<span class="subst">$&#123;S1&#125;</span>`</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      moveAfter(x, S2[i - <span class="number">1</span>], S1)</span><br><span class="line">      actions.push(<span class="string">`将S1中的<span class="subst">$&#123;x&#125;</span>移动到<span class="subst">$&#123;S2[i - <span class="number">1</span>]&#125;</span>的后面，S1变为：<span class="subst">$&#123;S1&#125;</span>`</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    actions.push(<span class="string">`<span class="subst">$&#123;x&#125;</span>不需要移动，S1为：<span class="subst">$&#123;S1&#125;</span>`</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">actions.forEach(<span class="function">(<span class="params">action</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">`  <span class="subst">$&#123;action&#125;</span>`</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>运行输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">S1: 0,1,2,3,4,5</span><br><span class="line">S2: 5,1,3,2,0,4</span><br><span class="line">最长子列表为：1,3,4</span><br><span class="line">所以进行3次移动可以将S1转换为S2：</span><br><span class="line">  将S1中的5移动到1的前面，S1变为：0,5,1,2,3,4</span><br><span class="line">  1不需要移动，S1为：0,5,1,2,3,4</span><br><span class="line">  3不需要移动，S1为：0,5,1,2,3,4</span><br><span class="line">  将S1中的2移动到3的后面，S1变为：0,5,1,3,2,4</span><br><span class="line">  将S1中的0移动到2的后面，S1变为：5,1,3,2,0,4</span><br><span class="line">  4不需要移动，S1为：5,1,3,2,0,4</span><br></pre></td></tr></table></figure>
+
+<h2 id="benchmark"><a href="#benchmark" class="headerlink" title="benchmark"></a>benchmark</h2><p>上面提到的新算法虽然总是能找到最长子列表，但是花在寻找上的时间也更多。所以这里需要做一个benchmark，看看新算法<strong>所减少的元素移动时间</strong>和<strong>寻找最长子列表的时间</strong>的大小关系。如果前者多于后者，说明新算法性能更好。</p>
+<h3 id="测试参数"><a href="#测试参数" class="headerlink" title="测试参数"></a>测试参数</h3><p>【需要有一个测试实验结果】</p>
+<!-- 经过测试发现，insertBefore的第二个参数也接近结尾性能越好。 -->
+
+      
+    </div>
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/note/" rel="tag">note</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/06/25/llvm-0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          学习LLVM第0篇：LLVM项目介绍
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/05/13/react-1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">玩转React系列1：React工作原理</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/llvm/">llvm</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/note/">note</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/react/">react</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%AF%84%E8%AE%BA/">评论</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenJDK/" rel="tag">OpenJDK</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/design/" rel="tag">design</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/econ/" rel="tag">econ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/" rel="tag">js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llvm/" rel="tag">llvm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nand2tetris/" rel="tag">nand2tetris</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/note/" rel="tag">note</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/openjdk/" rel="tag">openjdk</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/quickjs/" rel="tag">quickjs</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scheme/" rel="tag">scheme</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ukulele/" rel="tag">ukulele</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" rel="tag">经济学</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/02/14/openjdk-constant-pool/">HotSpot中的Run-Time Constant Pool实现</a>
+          </li>
+        
+          <li>
+            <a href="/2021/02/09/openjdk-class-and-object-in-hotspot/">HotSpot中的Java类和对象</a>
+          </li>
+        
+          <li>
+            <a href="/2020/12/26/openjdk-epsilon-gc-add-gc/">给OpenJDK中的Epsilon GC添加GC功能</a>
+          </li>
+        
+          <li>
+            <a href="/2020/12/23/the-design-of-everyday-things/">日用品的设计（持续更新中）</a>
+          </li>
+        
+          <li>
+            <a href="/2020/12/21/nand2tetris-2/">Nand2Tetris Part 2 课程总结</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2021 <a target="_blank" rel="noopener" href="https://github.com/lhtin">tintin</a><br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
